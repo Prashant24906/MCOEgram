@@ -55,18 +55,18 @@ function Chat({ currentUser, selectedUserName, selectedUserID, receiverId }) {
     };
   }, []);
 
-  // ================= MARK CHAT OPENED =================
+  //  MARK CHAT OPENED 
   useEffect(() => {
     if (!receiverId) return;
     socket.emit("chat_opened", { receiverId });
   }, [receiverId]);
 
-  // ================= AUTO SCROLL =================
+  // AUTO SCROLL 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // ================= FETCH OLD MESSAGES =================
+  // FETCH OLD MESSAGES
   useEffect(() => {
     if (!receiverId) return;
 
@@ -82,7 +82,6 @@ function Chat({ currentUser, selectedUserName, selectedUserID, receiverId }) {
     fetchMessages();
   }, [receiverId]);
 
-  // ================= SEND MESSAGE =================
   const sendMessage = () => {
     if (!message.trim() || !receiverId) return;
 
@@ -118,7 +117,7 @@ function Chat({ currentUser, selectedUserName, selectedUserID, receiverId }) {
         backgroundColor: "#e5ddd5",
       }}
     >
-      {/* ================= HEADER ================= */}
+     
       <div
         style={{
           padding: "15px",
@@ -130,7 +129,7 @@ function Chat({ currentUser, selectedUserName, selectedUserID, receiverId }) {
         <Link to={`/profile/${selectedUserID}`}>{selectedUserName}</Link>
       </div>
 
-      {/* ================= MESSAGES ================= */}
+
       <div
         style={{
           flex: 1,
@@ -187,11 +186,11 @@ function Chat({ currentUser, selectedUserName, selectedUserID, receiverId }) {
           </div>
         ))}
 
-        {/* Scroll anchor */}
+        
         <div ref={messagesEndRef} />
       </div>
 
-      {/* ================= INPUT ================= */}
+     
       <div
         style={{
           display: "flex",
@@ -232,7 +231,6 @@ function Chat({ currentUser, selectedUserName, selectedUserID, receiverId }) {
         </button>
       </div>
     </div>
-}
     </>
   );
 }
