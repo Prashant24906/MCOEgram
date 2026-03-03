@@ -77,12 +77,11 @@ position: relative;
 }
 .user-logo{
     /* margin-right: 4px; */
-    margin-right: -12rem;
+    margin-right:0.5rem;
     height: 2rem;
     width: 2rem;
 }
 .user-logo-profile{
-    /* margin-right: 4px; */
     margin-right: -11em;
     height: 2rem;
     width: 2rem;
