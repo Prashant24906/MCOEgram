@@ -142,7 +142,7 @@ function Profile({ currentUser }) {
                     </span>
                   </strong>
                   
-                    <div className="dropdown">
+                    {isOwnProfile&&<div className="dropdown">
                       <button
                         className="more"
                         type="button"
@@ -165,7 +165,7 @@ function Profile({ currentUser }) {
                           Delete
                         </li>
                       </ul>
-                    </div>
+                    </div>}
                   
                 </div>
                 <div className="card-body">
