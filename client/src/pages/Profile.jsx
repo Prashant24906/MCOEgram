@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import api from "../api/axios";
-
+import "../main.css";
 function Profile({ currentUser }) {
   const { userId } = useParams();
   const navigate = useNavigate();
@@ -10,48 +10,68 @@ function Profile({ currentUser }) {
   const ref = useRef(null);
   const [selectedPost, setSelectedPost] = useState(null);
   const effectiveUserId = userId || currentUser?._id;
-const isOwnProfile = currentUser?._id === effectiveUserId;
-  const OpenComment = () => {
-    ref.current.click();
+  const isOwnProfile = currentUser?._id === effectiveUserId;
+  const [Credentials, setCredentials] = useState({ name: "", bio: "" });
+
+  const onChange = (e) => {
+    setCredentials({ ...Credentials, [e.target.name]: e.target.value });
   };
-  
+
   const navigateToChat = () => {
     navigate("/chats", {
       state: { selectedUser: profileUser },
     });
   };
+
+  useEffect(() => {
+  if (profileUser) {
+    setCredentials({
+      name: profileUser.name || "",
+      bio: profileUser.bio || "",
+    });
+  }
+}, [profileUser]);
+
   // Single clean useEffect
-useEffect(() => {
-  if (!currentUser) return;
+  useEffect(() => {
+    if (!currentUser) return;
+    
+    const id = userId || currentUser._id;
+    
+    const fetchProfileData = async () => {
+      try {
+        const [userRes, postRes] = await Promise.all([
+          api.get(`/api/users/${id}`),
+          api.get(`/api/posts`),
+        ]);
+        
+        setProfileUser(userRes.data);
+        
+        // Proper filtering by user id
+        const filteredPosts = postRes.data.filter(
+          (post) => post.user && post.user._id === id,
+        );
 
-  const id = userId || currentUser._id;
+        setPosts(filteredPosts);
+      } catch (err) {
+        alert(err);
+      }
+    };
 
-  const fetchProfileData = async () => {
-    try {
-      const [userRes, postRes] = await Promise.all([
-        api.get(`/api/users/${id}`),
-        api.get(`/api/posts`),
-      ]);
+    fetchProfileData();
+  }, [userId, currentUser]);
 
-      setProfileUser(userRes.data);
+  const EditProfile = async () => {
+    const response = await api.put("api/users/update", Credentials);
+     setProfileUser((prev) => ({
+      ...prev,
+      name: response.data.name,
+      bio: response.data.bio,
+    }));
 
-      // 🔥 Proper filtering by user id
-      const filteredPosts = postRes.data.filter(
-        (post) => post.user && post.user._id === id
-      );
-
-      setPosts(filteredPosts);
-    } catch (err) {
-      console.error(err);
-    }
   };
-
-  fetchProfileData();
-}, [userId, currentUser]);
-  console.log(isOwnProfile)
   if (!profileUser) return <div>Loading profile...</div>;
-
-
+  
   return (
     <div style={{ padding: "30px" }}>
       {/* Profile Header */}
@@ -75,6 +95,8 @@ useEffect(() => {
 
           {isOwnProfile ? (
             <button
+              data-bs-toggle="modal"
+              data-bs-target="#EditProfile"
               style={{
                 padding: "8px 16px",
                 backgroundColor: "#333",
@@ -103,70 +125,87 @@ useEffect(() => {
       </div>
 
       {/* Posts Grid */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "10px",
-        }}
-      >
+      <div className="Profile">
         {posts.map((post) => (
-          <div key={post._id} style={{ marginBottom: "20px" }}>
+          <div className="Post" key={post._id} style={{ marginBottom: "20px" }}>
             <div>
-              <img
-                src={post.user.profilePic}
-                width="40"
-                style={{ borderRadius: "50%" }}
-              />
-              <strong>
-                <Link to={`/profile/${post.user._id}`}>{post.user.name}</Link>
-              </strong>
-            </div>
+              <div className="">
+                <div className="card-header">
+                  <img
+                    className="user-logo"
+                    src={post.user.profilePic}
+                    width="40"
+                    style={{ borderRadius: "50%" }}
+                  />
+                  <strong>
+                    <span className="UserName">
+                      <Link to={`/profile/${post.user._id}`}>
+                        {post.user.name}
+                      </Link>
+                    </span>
+                  </strong>
+                </div>
+                <div className="card-body">
+                  <img
+                    src={post.imageUrl}
+                    width="300px"
+                    height="200px"
+                    style={{ display: "block", marginTop: "10px" }}
+                  />
+                  <h5 className="card-title d-flex CaptionBox">
+                    <p className="CaptionName">{post.user.name}: </p>
+                    <p className="Caption">{post.caption}</p>
+                  </h5>
+                  <div className="FooterPost">
+                    <button
+                      className="LikeButton"
+                      onClick={async () => {
+                        const updatedPosts = posts.map((p) => {
+                          if (p._id === post._id) {
+                            const alreadyLiked = p.likes.includes(
+                              currentUser._id,
+                            );
 
-            <img
-              src={post.imageUrl}
-              width="300"
-              style={{ display: "block", marginTop: "10px" }}
-            />
-            <div className="CaptionProfile">
-              <p className="ProfileCaptionName">{currentUser.name}: </p>
-              <p className="ProfileCaption">{post.caption}</p>
-            </div>
-            <button
-              style={{
-                color: post.likes.includes(currentUser._id) ? "red" : "black",
-              }}
-              onClick={async () => {
-                const updatedPosts = posts.map((p) => {
-                  if (p._id === post._id) {
-                    const alreadyLiked = p.likes.includes(currentUser._id);
+                            return {
+                              ...p,
+                              likes: alreadyLiked
+                                ? p.likes.filter((id) => id !== currentUser._id)
+                                : [...p.likes, currentUser._id],
+                            };
+                          }
+                          return p;
+                        });
 
-                    return {
-                      ...p,
-                      likes: alreadyLiked
-                        ? p.likes.filter((id) => id !== currentUser._id)
-                        : [...p.likes, currentUser._id],
-                    };
-                  }
-                  return p;
-                });
+                        setPosts(updatedPosts);
 
-                setPosts(updatedPosts);
-
-                await api.put(`/api/posts/${post._id}/like`);
-              }}
-            >
-              ❤️ {post.likes.length}
-            </button>
-            <div>
-              <button
-                className="CommentBox"
-                data-bs-toggle="modal"
-                data-bs-target="#commentModal"
-                onClick={() => setSelectedPost(post)}
-              >
-                <i className="fa-regular fa-comment"></i>
-              </button>
+                        try {
+                          await api.put(`/api/posts/${post._id}/like`);
+                        } catch (err) {
+                          alert("Like failed:", err);
+                        }
+                      }}
+                    >
+                      <i
+                        className={
+                          post.likes.includes(currentUser._id)
+                            ? "fa-solid fa-thumbs-up"
+                            : "fa-regular fa-thumbs-up"
+                        }
+                      ></i>{" "}
+                      {post.likes.length}
+                    </button>
+                    <button
+                      className="CommentBox"
+                      data-bs-toggle="modal"
+                      data-bs-target="#commentModal"
+                      onClick={() => setSelectedPost(post)}
+                    >
+                      <i className="fa-regular fa-comment"></i>
+                      {post.comments.length}
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         ))}
@@ -222,6 +261,54 @@ useEffect(() => {
                   </>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="modal fade"
+          id="EditProfile"
+          tabIndex="-1"
+          aria-hidden="true"
+        >
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Update</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                ></button>
+              </div>
+
+              <div className="modal-body UpdateBio">
+                <span>Name:</span>
+                <input
+                  placeholder="Minimun length should be 5 characters"
+                  type="text"
+                  onChange={onChange}
+                  name="name"
+                  id="name"
+                  value={Credentials.name}
+                />
+              </div>
+              <div className="modal-body UpdateBio">
+                <span>Bio:</span>
+                <input
+                  type="text"
+                  onChange={onChange}
+                  name="bio"
+                  id="bio"
+                  value={Credentials.bio}
+                  
+                />
+              </div>
+              <button
+                onClick = {EditProfile}
+                data-bs-dismiss="modal"
+              >
+                <span>Update</span>
+              </button>
             </div>
           </div>
         </div>

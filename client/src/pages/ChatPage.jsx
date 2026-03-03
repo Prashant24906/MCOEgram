@@ -52,17 +52,14 @@ function ChatsPage({ user }) {
 
   useEffect(() => {
     socket.on("online_users", (users) => {
-      console.log("Initial online users:", users);
       setOnlineUsers(users);
     });
 
     socket.on("user_online", (userId) => {
-      console.log("User came online:", userId);
       setOnlineUsers((prev) => [...new Set([...prev, userId])]);
     });
 
     socket.on("user_offline", (userId) => {
-      console.log("User went offline:", userId);
       setOnlineUsers((prev) => prev.filter((id) => id !== userId));
     });
 
@@ -112,7 +109,7 @@ function ChatsPage({ user }) {
           const res = await api.get("/api/users");
           setUsers(res.data);
         } catch (err) {
-          console.error("Failed to fetch users", err);
+          alert("Failed to fetch users Please try again")
         }
       };
 
@@ -153,7 +150,6 @@ function ChatsPage({ user }) {
         <h3>Chats</h3>
         <button
           onClick={() => {
-            console.log("New Chat clicked");
             setShowUsers(true);
           }}
         >
@@ -205,8 +201,6 @@ function ChatsPage({ user }) {
             (p) => p._id.toString() !== user._id.toString(),
           );
           if (!otherUser) return null;
-          console.log("Other user id:", otherUser._id.toString());
-          console.log("Online users:", onlineUsers);
 
           return (
             <div

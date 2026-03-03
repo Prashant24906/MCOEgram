@@ -25,7 +25,7 @@ function App() {
         const res = await api.get("/api/users/me");
         setUser(res.data);
       } catch (err) {
-        console.log("Not logged in");
+        alert("Not logged in");
       } finally {
         setLoading(false);
       }
@@ -48,7 +48,7 @@ function App() {
     };
   }, [user]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div>Backend is starting Please wait....</div>;
 
   return (
     <>

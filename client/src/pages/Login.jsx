@@ -30,12 +30,10 @@ function Login({ setUser }) {
       });
 
       localStorage.setItem("token", res.data.token);
-      console.log(res.data);
       setUser(res.data.user);
       history("/feed");
     } catch (error) {
-      console.error(error.response?.data?.message || "Login failed");
-      alert("Login failed");
+      alert(error.response?.data?.message|| "Login failed" );
     } finally {
       setLoading(false);
     }

@@ -8,12 +8,12 @@ router.get("/me", protect, async (req, res) => {
 });
 
 router.put("/update", protect, async (req, res) => {
-  const { bio } = req.body;
-
+  const { bio,name } = req.body;
   const user = await User.findById(req.user._id);
 
   if (user) {
     user.bio = bio || user.bio;
+    user.name = name || user.name;
     await user.save();
     res.json(user);
   } else {

@@ -8,7 +8,7 @@ function Feed({ user }) {
   const [posts, setPosts] = useState([]);
   const ref = useRef(null);
   const [selectedPost, setSelectedPost] = useState(null);
-
+  const [Liked, notLiked] = useState(false);
   useEffect(() => {
     const fetchPosts = async () => {
       const res = await api.get("/api/posts");
@@ -39,16 +39,19 @@ function Feed({ user }) {
             <div>
               <div className="">
                 <div className="card-header">
-                  {" "}
                   <img
+                  className = "user-logo"
                     src={post.user.profilePic}
                     width="40"
                     style={{ borderRadius: "50%" }}
                   />
                   <strong>
+                    <span className = "UserName">
+                      
                     <Link to={`/profile/${post.user._id}`}>
                       {post.user.name}
                     </Link>
+                    </span>
                   </strong>
                 </div>
                 <div className="card-body">
@@ -61,12 +64,9 @@ function Feed({ user }) {
                     <p className="CaptionName">{post.user.name}: </p>
                     <p className="Caption">{post.caption}</p>
                   </h5>
-                  <div className="card text-center row-md-6 my-0 notes FooterPost">
+                  <div className="FooterPost">
                     <button
                       className="LikeButton"
-                      style={{
-                        color: post.likes.includes(user._id) ? "red" : "black",
-                      }}
                       onClick={async () => {
                         const updatedPosts = posts.map((p) => {
                           if (p._id === post._id) {
@@ -84,10 +84,21 @@ function Feed({ user }) {
 
                         setPosts(updatedPosts);
 
-                        await api.put(`/api/posts/${post._id}/like`);
+                        try {
+                          await api.put(`/api/posts/${post._id}/like`);
+                        } catch (err) {
+                          alert("Like failed:", err);
+                        }
                       }}
                     >
-                      ❤️ {post.likes.length}
+                      <i
+                        className={
+                          post.likes.includes(user._id)
+                            ? "fa-solid fa-thumbs-up"
+                            : "fa-regular fa-thumbs-up"
+                        }
+                      ></i>{" "}
+                      {post.likes.length}
                     </button>
                     <button
                       className="CommentBox"
@@ -96,6 +107,7 @@ function Feed({ user }) {
                       onClick={() => setSelectedPost(post)}
                     >
                       <i className="fa-regular fa-comment"></i>
+                      {post.comments.length}
                     </button>
                   </div>
                 </div>

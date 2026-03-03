@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import socket from "../sockets";
-
+import "../main.css";
 function Navbar() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -12,9 +12,9 @@ function Navbar() {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg bg-dark border-bottom border-body" data-bs-theme="dark">
+    <nav className="navbar navbar-expand-lg border-bottom border-body" data-bs-theme="dark">
       <div className="container-fluid">
-        <NavLink className="navbar-brand" to="/feed">
+        <NavLink className="navbar-brand"to={localStorage.getItem('token')?"/feed":"/login"}>
           MCOEGRAM
         </NavLink>
 
