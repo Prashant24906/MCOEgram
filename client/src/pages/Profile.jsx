@@ -128,12 +128,14 @@ function Profile({ currentUser }) {
             <div>
               <div className="">
                 <div className="Feed-Post-header">
+                 <div className="Feed-Post-First">
+
                   <img
-                    className="user-logo-profile"
+                    className="user-logo"
                     src={post.user.profilePic}
                     width="40"
-                    style={{ borderRadius: "50%"}}
-                  />
+                    style={{ borderRadius: "50%" }}
+                    />
                   <strong>
                     <span className=" UserName">
                       <Link to={`/profile/${post.user._id}`}>
@@ -141,33 +143,28 @@ function Profile({ currentUser }) {
                       </Link>
                     </span>
                   </strong>
-                  
-                    {isOwnProfile&&<div className="dropdown">
-                      <button
-                        className="more"
-                        type="button"
-                        style={{ border: "none", background: 0 }}
-                        data-bs-toggle="dropdown"
-                      >
-                        <i className="fa-solid fa-ellipsis-vertical"></i>
-                      </button>
-                      <ul className="dropdown-menu">
-                        <li
-                          className="dropdown-item"
-                          onClick={async () => {
-                            try {
-                              await api.delete(`/api/posts/delete/${post._id}`);
-                            } catch (err) {
-                              alert("Like failed:", err);
-                            }
-                          }}
-                        >
-                          Delete
-                        </li>
-                      </ul>
-                    </div>}
-                  
-                </div>
+                    </div>
+                  <div className="Feed-Post-Second">
+
+                  {isOwnProfile&&<div className="dropdown">
+                     <button className="more" type="button"  style = {{border: "none",background: 0}} data-bs-toggle="dropdown" >
+                    <i className="fa-solid fa-ellipsis-vertical" ></i>
+                  </button>
+                    <ul className="dropdown-menu">
+                      <li className="dropdown-item" onClick ={async()=>{
+                        try {
+                          await api.delete(`/api/posts/delete/${post._id}`);
+                        } catch (err) {
+                          alert("Like failed:", err);
+                        }
+                      }}>
+                        Delete
+                      </li>
+                      
+                    </ul>
+                  </div>}
+                  </div>
+                  </div>
                 <div className="card-body">
                   <img
                     src={post.imageUrl}
