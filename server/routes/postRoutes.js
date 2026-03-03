@@ -29,5 +29,20 @@ router.get("/user/:userId", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+router.delete("/delete/:postId", protect,async (req, res) => {
+  console.log(req.params.postId)
+      try {
+    // Find the post
+    var post = await Post.findById(req.params.postId)
+    if(!post) return res.status(404).json("Not found")
+    if(post.user.toString()!==req.user.id) {
+        return res.status(401).send("Not Allowed")
+    }
+    const status = await post.deleteOne()
+    res.json(status);
+    } catch (error) {
+      res.status(400).json({ error: "Some error occured" });
+    }
+});
 
 module.exports = router;

@@ -6,7 +6,7 @@
 position: relative;
   width: 100%;
   height: 100%;
-}   
+} 
 .login::before{
   content: '';
   position: absolute;
@@ -20,8 +20,8 @@ position: relative;
   opacity: 0.5; /* Adjust this value (0 = transparent, 1 = opaque) */
   z-index: -1; /* Ensures the background stays behind content */
 }
-.body{
-    background: #000;
+.root{
+    background: #000000;
 }
 .Post{
     border-radius: 5px;
@@ -76,7 +76,14 @@ position: relative;
 
 }
 .user-logo{
-    margin-right: 4px;
+    /* margin-right: 4px; */
+    margin-right: -12rem;
+    height: 2rem;
+    width: 2rem;
+}
+.user-logo-profile{
+    /* margin-right: 4px; */
+    margin-right: -11em;
     height: 2rem;
     width: 2rem;
 }
@@ -95,4 +102,11 @@ position: relative;
 .UpdateBio{
     display: flex;
     flex-direction: column;
+}
+.Feed-Post-header{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    justify-content: space-between;
 }

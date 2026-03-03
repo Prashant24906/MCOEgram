@@ -24,29 +24,29 @@ function Profile({ currentUser }) {
   };
 
   useEffect(() => {
-  if (profileUser) {
-    setCredentials({
-      name: profileUser.name || "",
-      bio: profileUser.bio || "",
-    });
-  }
-}, [profileUser]);
+    if (profileUser) {
+      setCredentials({
+        name: profileUser.name || "",
+        bio: profileUser.bio || "",
+      });
+    }
+  }, [profileUser]);
 
   // Single clean useEffect
   useEffect(() => {
     if (!currentUser) return;
-    
+
     const id = userId || currentUser._id;
-    
+
     const fetchProfileData = async () => {
       try {
         const [userRes, postRes] = await Promise.all([
           api.get(`/api/users/${id}`),
           api.get(`/api/posts`),
         ]);
-        
+
         setProfileUser(userRes.data);
-        
+
         // Proper filtering by user id
         const filteredPosts = postRes.data.filter(
           (post) => post.user && post.user._id === id,
@@ -63,15 +63,14 @@ function Profile({ currentUser }) {
 
   const EditProfile = async () => {
     const response = await api.put("api/users/update", Credentials);
-     setProfileUser((prev) => ({
+    setProfileUser((prev) => ({
       ...prev,
       name: response.data.name,
       bio: response.data.bio,
     }));
-
   };
   if (!profileUser) return <div>Loading profile...</div>;
-  
+
   return (
     <div style={{ padding: "30px" }}>
       {/* Profile Header */}
@@ -123,27 +122,51 @@ function Profile({ currentUser }) {
           )}
         </div>
       </div>
-
-      {/* Posts Grid */}
       <div className="Profile">
         {posts.map((post) => (
           <div className="Post" key={post._id} style={{ marginBottom: "20px" }}>
             <div>
               <div className="">
-                <div className="card-header">
+                <div className="Feed-Post-header">
                   <img
-                    className="user-logo"
+                    className="user-logo-profile"
                     src={post.user.profilePic}
                     width="40"
-                    style={{ borderRadius: "50%" }}
+                    style={{ borderRadius: "50%"}}
                   />
                   <strong>
-                    <span className="UserName">
+                    <span className=" UserName">
                       <Link to={`/profile/${post.user._id}`}>
                         {post.user.name}
                       </Link>
                     </span>
                   </strong>
+                  
+                    <div className="dropdown">
+                      <button
+                        className="more"
+                        type="button"
+                        style={{ border: "none", background: 0 }}
+                        data-bs-toggle="dropdown"
+                      >
+                        <i className="fa-solid fa-ellipsis-vertical"></i>
+                      </button>
+                      <ul className="dropdown-menu">
+                        <li
+                          className="dropdown-item"
+                          onClick={async () => {
+                            try {
+                              await api.delete(`/api/posts/delete/${post._id}`);
+                            } catch (err) {
+                              alert("Like failed:", err);
+                            }
+                          }}
+                        >
+                          Delete
+                        </li>
+                      </ul>
+                    </div>
+                  
                 </div>
                 <div className="card-body">
                   <img
@@ -300,13 +323,9 @@ function Profile({ currentUser }) {
                   name="bio"
                   id="bio"
                   value={Credentials.bio}
-                  
                 />
               </div>
-              <button
-                onClick = {EditProfile}
-                data-bs-dismiss="modal"
-              >
+              <button onClick={EditProfile} data-bs-dismiss="modal">
                 <span>Update</span>
               </button>
             </div>

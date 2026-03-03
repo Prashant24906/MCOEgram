@@ -13,7 +13,7 @@ function Navbar() {
 
   return (
     <nav className="navbar navbar-expand-lg border-bottom border-body" data-bs-theme="dark">
-      <div className="container-fluid">
+      <div className="container-fluid ">
         <NavLink className="navbar-brand"to={localStorage.getItem('token')?"/feed":"/login"}>
           MCOEGRAM
         </NavLink>
