@@ -40,40 +40,49 @@ function Feed({ user }) {
               <div className="">
                 <div className="Feed-Post-header">
                   <div className="Feed-Post-First">
-
-                  <img
-                    className="user-logo"
-                    src={post.user.profilePic}
-                    width="40"
-                    style={{ borderRadius: "50%" }}
+                    <img
+                      className="user-logo"
+                      src={post.user.profilePic}
+                      width="40"
+                      style={{ borderRadius: "50%" }}
                     />
-                  <strong>
-                    <span className=" UserName">
-                      <Link to={`/profile/${post.user._id}`}>
-                        {post.user.name}
-                      </Link>
-                    </span>
-                  </strong>
-                    </div>
+                    <strong>
+                      <span className=" UserName">
+                        <Link to={`/profile/${post.user._id}`}>
+                          {post.user.name}
+                        </Link>
+                      </span>
+                    </strong>
+                  </div>
                   <div className="Feed-Post-Second">
-
-                  {(post.user._id===user._id)&&<div className="dropdown">
-                     <button className="more" type="button"  style = {{border: "none",background: 0}} data-bs-toggle="dropdown" >
-                    <i className="fa-solid fa-ellipsis-vertical" ></i>
-                  </button>
-                    <ul className="dropdown-menu">
-                      <li className="dropdown-item" onClick ={async()=>{
-                        try {
-                          await api.delete(`/api/posts/delete/${post._id}`);
-                        } catch (err) {
-                          alert("Like failed:", err);
-                        }
-                      }}>
-                        Delete
-                      </li>
-                      
-                    </ul>
-                  </div>}
+                    {post.user._id === user._id && (
+                      <div className="dropdown">
+                        <button
+                          className="more"
+                          type="button"
+                          style={{ border: "none", background: 0 }}
+                          data-bs-toggle="dropdown"
+                        >
+                          <i className="fa-solid fa-ellipsis-vertical"></i>
+                        </button>
+                        <ul className="dropdown-menu">
+                          <li
+                            className="dropdown-item"
+                            onClick={async () => {
+                              try {
+                                await api.delete(
+                                  `/api/posts/delete/${post._id}`,
+                                );
+                              } catch (err) {
+                                alert("Like failed:", err);
+                              }
+                            }}
+                          >
+                            Delete
+                          </li>
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="card-body">
@@ -176,11 +185,16 @@ function Feed({ user }) {
                             ),
                           );
 
+                          setSelectedPost((prev) => ({
+                            ...prev,
+                            comments: [res.data, ...prev.comments],
+                          }));
+
                           e.target.value = "";
                         }
                       }}
+                      
                     />
-
                     {selectedPost.comments.map((comment) => (
                       <div key={comment._id}>
                         <strong>{comment.user.name}</strong>: {comment.text}

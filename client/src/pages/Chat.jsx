@@ -89,8 +89,8 @@ const sendMessage = () => {
     receiverId,
     text: message,
   });
-
   setMessage("");
+  fetchMessages();
 };
 
   return (

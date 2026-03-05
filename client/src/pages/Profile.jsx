@@ -128,43 +128,52 @@ function Profile({ currentUser }) {
             <div>
               <div className="">
                 <div className="Feed-Post-header">
-                 <div className="Feed-Post-First">
-
-                  <img
-                    className="user-logo"
-                    src={post.user.profilePic}
-                    width="40"
-                    style={{ borderRadius: "50%" }}
+                  <div className="Feed-Post-First">
+                    <img
+                      className="user-logo"
+                      src={post.user.profilePic}
+                      width="40"
+                      style={{ borderRadius: "50%" }}
                     />
-                  <strong>
-                    <span className=" UserName">
-                      <Link to={`/profile/${post.user._id}`}>
-                        {post.user.name}
-                      </Link>
-                    </span>
-                  </strong>
-                    </div>
+                    <strong>
+                      <span className=" UserName">
+                        <Link to={`/profile/${post.user._id}`}>
+                          {post.user.name}
+                        </Link>
+                      </span>
+                    </strong>
+                  </div>
                   <div className="Feed-Post-Second">
-
-                  {isOwnProfile&&<div className="dropdown">
-                     <button className="more" type="button"  style = {{border: "none",background: 0}} data-bs-toggle="dropdown" >
-                    <i className="fa-solid fa-ellipsis-vertical" ></i>
-                  </button>
-                    <ul className="dropdown-menu">
-                      <li className="dropdown-item" onClick ={async()=>{
-                        try {
-                          await api.delete(`/api/posts/delete/${post._id}`);
-                        } catch (err) {
-                          alert("Like failed:", err);
-                        }
-                      }}>
-                        Delete
-                      </li>
-                      
-                    </ul>
-                  </div>}
+                    {isOwnProfile && (
+                      <div className="dropdown">
+                        <button
+                          className="more"
+                          type="button"
+                          style={{ border: "none", background: 0 }}
+                          data-bs-toggle="dropdown"
+                        >
+                          <i className="fa-solid fa-ellipsis-vertical"></i>
+                        </button>
+                        <ul className="dropdown-menu">
+                          <li
+                            className="dropdown-item"
+                            onClick={async () => {
+                              try {
+                                await api.delete(
+                                  `/api/posts/delete/${post._id}`,
+                                );
+                              } catch (err) {
+                                alert("Like failed:", err);
+                              }
+                            }}
+                          >
+                            Delete
+                          </li>
+                        </ul>
+                      </div>
+                    )}
                   </div>
-                  </div>
+                </div>
                 <div className="card-body">
                   <img
                     src={post.imageUrl}
@@ -259,7 +268,6 @@ function Profile({ currentUser }) {
                             `/api/posts/${selectedPost._id}/comment`,
                             { text: e.target.value },
                           );
-
                           setPosts((prev) =>
                             prev.map((p) =>
                               p._id === selectedPost._id
@@ -267,6 +275,10 @@ function Profile({ currentUser }) {
                                 : p,
                             ),
                           );
+                          setSelectedPost((prev) => ({
+                            ...prev,
+                            comments: [res.data, ...prev.comments],
+                          }));
 
                           e.target.value = "";
                         }

@@ -216,7 +216,7 @@ function ChatsPage({ user }) {
               </strong>
 
               <p style={{ fontSize: "12px", color: "gray" }}>
-                {chat.lastMessage?.text || "No messages yet"}
+                {(chat.lastMessage?.text).slice(0,15) || "No messages yet"}
               </p>
             </div>
           );
