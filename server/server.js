@@ -9,7 +9,6 @@ const connectDB = require("./config/db");
 const chatRoutes = require("./routes/chatRoutes");
 const app = express();
 connectDB();
-
 app.use(
   cors({
     origin: process.env.FRONTEND_URL,
@@ -19,7 +18,8 @@ app.use(
   }),
 );
 
-// 🔥 THIS IS THE IMPORTANT LINE
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.options(/.*/, cors());
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
@@ -28,7 +28,6 @@ const User = require("./models/User");
 const Chat = require("./models/Chat");
 const Message = require("./models/Message");
 
-app.use(express.json());
 app.use("/api/posts", postRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);

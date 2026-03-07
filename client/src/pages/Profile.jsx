@@ -11,11 +11,9 @@ function Profile({ currentUser }) {
   const [profileUser, setProfileUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [Credentials, setCredentials] = useState({ name: "", bio: "" });
-
   const effectiveUserId = userId || currentUser?._id;
   const isOwnProfile = currentUser?._id === effectiveUserId;
 
-  // Fetch Profile + Posts
   useEffect(() => {
     if (!currentUser) return;
 

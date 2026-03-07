@@ -1,5 +1,6 @@
 const cloudinary = require("../config/cloudinary");
 const Post = require("../models/Post");
+const Article = require("../models/Article");
 const Comment = require("../models/Comment");
 
 exports.getPosts = async (req, res) => {
@@ -18,11 +19,33 @@ exports.getPosts = async (req, res) => {
           ...post.toObject(),
           comments,
         };
-      })
+      }),
     );
 
     res.json(postsWithComments);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch posts" });
+  }
+};
 
+exports.getArticle = async (req, res) => {
+  try {
+    const articles = await Article.find()
+      .populate("user", "name profilePic")
+      .sort({ createdAt: -1 });
+    const WithComments = await Promise.all(
+      articles.map(async (article) => {
+        const comments = await Comment.find({ article: article._id })
+          .populate("user", "name profilePic")
+          .sort({ createdAt: -1 });
+
+        return {
+          ...article.toObject(),
+          comments,
+        };
+      }),
+    );
+    res.json(WithComments);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch posts" });
   }
@@ -38,15 +61,56 @@ exports.addComment = async (req, res) => {
       text,
     });
 
-    const populatedComment = await comment.populate(
-      "user",
-      "name profilePic"
-    );
+    const populatedComment = await comment.populate("user", "name profilePic");
 
     res.status(201).json(populatedComment);
-
   } catch (error) {
     res.status(500).json({ message: "Comment failed" });
+  }
+};
+exports.addArticleComment = async (req, res) => {
+  try {
+    const { text } = req.body;
+
+    const comment = await Comment.create({
+      post: req.params.id,
+      user: req.user._id,
+      text,
+    });
+
+    const populatedComment = await comment.populate("user", "name profilePic");
+
+    res.status(201).json(populatedComment);
+  } catch (error) {
+    res.status(500).json({ message: "Comment failed" });
+  }
+};
+
+exports.toggleArticleLike = async (req, res) => {
+  try {
+    const article = await Article.findById(req.params.id);
+    if (!article) {
+      return res.status(404).json({ message: "Artice not found" });
+    }
+
+    const userId = req.user._id.toString();
+
+    const alreadyLiked = article.likes.some((id) => id.toString() === userId);
+
+    if (alreadyLiked) {
+      article.likes = article.likes.filter((id) => id.toString() !== userId);
+    } else {
+      article.likes.push(userId);
+    }
+
+    await article.save();
+
+    res.json({
+      likesCount: article.likes.length,
+      liked: !alreadyLiked,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Like failed" });
   }
 };
 
@@ -60,14 +124,10 @@ exports.toggleLike = async (req, res) => {
 
     const userId = req.user._id.toString();
 
-    const alreadyLiked = post.likes.some(
-      (id) => id.toString() === userId
-    );
+    const alreadyLiked = post.likes.some((id) => id.toString() === userId);
 
     if (alreadyLiked) {
-      post.likes = post.likes.filter(
-        (id) => id.toString() !== userId
-      );
+      post.likes = post.likes.filter((id) => id.toString() !== userId);
     } else {
       post.likes.push(userId);
     }
@@ -76,14 +136,12 @@ exports.toggleLike = async (req, res) => {
 
     res.json({
       likesCount: post.likes.length,
-      liked: !alreadyLiked
+      liked: !alreadyLiked,
     });
-
   } catch (error) {
     res.status(500).json({ message: "Like failed" });
   }
 };
-
 
 exports.createPost = async (req, res) => {
   try {
@@ -103,12 +161,24 @@ exports.createPost = async (req, res) => {
         });
 
         res.status(201).json(post);
-      }
+      },
     );
 
     result.end(req.file.buffer);
-
   } catch (error) {
     res.status(500).json({ message: "Post creation failed" });
+  }
+};
+exports.createArticle = async (req, res) => {
+  try {
+    const { caption } = req.body||{};
+    const article = await Article.create({
+      user: req.user._id,
+      caption,
+    });
+    res.status(201).json(article);
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: "Article creation failed" });
   }
 };

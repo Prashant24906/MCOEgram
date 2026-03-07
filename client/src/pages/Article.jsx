@@ -5,46 +5,54 @@ import { Heart, MessageCircle, MoreHorizontal } from "lucide-react";
 import "../main.css";
 import "./feed.css";
 
-function Feed({ user }) {
-  const [posts, setPosts] = useState([]);
-  const [selectedPost, setSelectedPost] = useState(null);
-
+function Article({ user }) {
+  const [articles, setArticles] = useState([]);
+  const [selectedArticle, setselectedArticle] = useState(null);
+  const [Caption, setcaption] = useState("");
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      const res = await api.get("/api/posts");
-      setPosts(res.data);
+    const fetchArticle = async () => {
+      const res = await api.get("/api/posts/article");
+      setArticles(res.data);
     };
 
-    fetchPosts();
-  }, []);
+    fetchArticle();
+  }, [articles.length]);
 
+  const PostArticle = async () => {
+    const response = await api.post("/api/posts/article", {
+      caption: Caption,
+    });
+    setArticles((prev) => [response.data, ...prev]);
+    setcaption("");
+  };
 
-  const toggleLike = async (postId) => {
-    setPosts((prev) =>
-      
-      prev.map((post) => {
-        if (post._id === postId) {
-          const alreadyLiked = post.likes.includes(user._id);
+  const onChange = (e) => {
+    setcaption(e.target.value);
+  };
+
+  const toggleArticleLike = async (articleId) => {
+    setArticles((prev) =>
+      prev.map((article) => {
+        if (article._id === articleId) {
+          const alreadyLiked = article.likes?.includes(user._id);
           return {
-            ...post,
+            ...article,
             likes: alreadyLiked
-              ? post.likes.filter((id) => id !== user._id)
-              : [...post.likes, user._id],
+              ? article.likes.filter((id) => id !== user._id)
+              : [...article.likes, user._id],
           };
         }
-        return post;
+        return article;
       }),
     );
 
     try {
-      await api.put(`/api/posts/${postId}/like`);
+      await api.put(`/api/posts/article/${articleId}/like`);
     } catch (err) {
       console.error("Like failed", err);
     }
   };
-
-  
 
   return (
     <div className="feed-container">
@@ -57,58 +65,63 @@ function Feed({ user }) {
             </p>
           </div>
         </div>
-
-        <div className="posts-container">
-          {posts.map((post) => {
-            const isLiked = post.likes.includes(user._id);
+        <button
+          className="Add-article"
+          data-bs-toggle="modal"
+          data-bs-target="#EditProfile"
+        >
+          Add Article
+        </button>
+        <div className="Article-container">
+          {articles.map((article) => {
+            const isLiked = article.likes?.includes(user._id);
 
             return (
-              <article key={post._id} className="post-card">
+              <article key={article._id} className="article-card">
                 <div className="post-header">
                   <div className="user-info">
                     <img
-                      src={post.user.profilePic}
-                      alt={post.user.name}
+                      src={article.user.profilePic}
+                      alt={article.user.name}
                       className="user-avatar"
                     />
                     <div className="user-details">
                       <Link
-                        to={`/profile/${post.user._id}`}
+                        to={`/profile/${article.user._id}`}
                         className="username"
                       >
-                        {post.user.name}
+                        {article.user.name}
                       </Link>
                     </div>
                   </div>
 
-                  {post.user._id === user._id && (
+                  {article.user._id === user._id && (
                     <div className="dropdown">
                       <button className="menu-button" data-bs-toggle="dropdown">
                         <MoreHorizontal size={20} />
                       </button>
                       <ul className="dropdown-menu">
                         <li
-                          className="dropdown-item"
+                          type = "button"
+                          className="dropdown-item Delete-Button"
                           onClick={async () => {
-                            await api.delete(`/api/posts/delete/${post._id}`);
-                            setPosts((prev) =>
-                              prev.filter((p) => p._id !== post._id),
+                            await api.delete(
+                              `/api/posts/article/delete/${article._id}`,
+                            );
+                            setArticles((prev) =>
+                              prev.filter((p) => p._id !== article._id),
                             );
                           }}
                         >
-                          Delete
+                         Delete
                         </li>
                       </ul>
                     </div>
                   )}
                 </div>
-                {/* <div className="post-image-wrapper"> */}
-                <img src={post.imageUrl} className="post-image" />
-                {/* </div> */}
-
                 <div className="post-caption">
                   <p className="caption-text">
-                    <strong>{post.user.name}</strong> {post.caption}
+                    <strong>{article.user.name}</strong> {article.caption}
                   </p>
                 </div>
 
@@ -117,23 +130,27 @@ function Feed({ user }) {
                     className={`action-button like-button ${
                       isLiked ? "liked" : ""
                     }`}
-                    onClick={() => toggleLike(post._id)}
+                    onClick={() => toggleArticleLike(article._id)}
                   >
                     <Heart
                       size={20}
                       className={isLiked ? "heart-filled" : ""}
                     />
-                    <span className="action-text">{post.likes.length}</span>
+                    <span className="action-text">
+                      {article.likes?.length || 0}
+                    </span>
                   </button>
 
                   <button
                     className="action-button comment-button"
                     data-bs-toggle="modal"
                     data-bs-target="#commentModal"
-                    onClick={() => setSelectedPost(post)}
+                    onClick={() => setselectedArticle(article)}
                   >
                     <MessageCircle size={20} />
-                    <span className="action-text">{post.comments.length}</span>
+                    <span className="action-text">
+                      {article.comments?.length || 0}
+                    </span>
                   </button>
                 </div>
               </article>
@@ -141,7 +158,43 @@ function Feed({ user }) {
           })}
         </div>
       </div>
+      <div className="AddArticle">
+        <div className="modal fade" id="EditProfile">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5>Add Article</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                ></button>
+              </div>
 
+              <div className="modal-body">
+                <input
+                  type="text"
+                  name="Caption"
+                  value={Caption}
+                  onChange={onChange}
+                  className="form-control mb-3"
+                  placeholder="Whats your thought"
+                />
+              </div>
+
+              <div className="modal-footer">
+                <button
+                  className="btn btn-primary"
+                  onClick={PostArticle}
+                  data-bs-dismiss="modal"
+                >
+                  Post
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       {/* Comment Modal */}
       <div className="modal fade" id="commentModal">
         <div className="modal-dialog">
@@ -156,7 +209,7 @@ function Feed({ user }) {
             </div>
 
             <div className="modal-body">
-              {selectedPost && (
+              {selectedArticle && (
                 <>
                   <input
                     type="text"
@@ -165,13 +218,13 @@ function Feed({ user }) {
                     onKeyDown={async (e) => {
                       if (e.key === "Enter" && e.target.value.trim()) {
                         const res = await api.post(
-                          `/api/posts/${selectedPost._id}/comment`,
+                          `/api/posts/article/${selectedArticle._id}/comment`,
                           { text: e.target.value },
                         );
 
-                        setPosts((prev) =>
+                        setArticles((prev) =>
                           prev.map((p) =>
-                            p._id === selectedPost._id
+                            p._id === selectedArticle._id
                               ? {
                                   ...p,
                                   comments: [res.data, ...p.comments],
@@ -180,7 +233,7 @@ function Feed({ user }) {
                           ),
                         );
 
-                        setSelectedPost((prev) => ({
+                        setselectedArticle((prev) => ({
                           ...prev,
                           comments: [res.data, ...prev.comments],
                         }));
@@ -190,7 +243,7 @@ function Feed({ user }) {
                     }}
                   />
 
-                  {selectedPost.comments.map((comment) => (
+                  {selectedArticle.comments?.map((comment) => (
                     <div key={comment._id}>
                       <strong>{comment.user.name}</strong>: {comment.text}
                     </div>
@@ -205,4 +258,4 @@ function Feed({ user }) {
   );
 }
 
-export default Feed;
+export default Article;

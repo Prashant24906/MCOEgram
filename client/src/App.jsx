@@ -6,6 +6,7 @@ import Navbar from "./components/Navbar";
 import Profile from "./pages/Profile";
 import ChatsPage from "./pages/ChatPage";
 import Feed from "./pages/Feed";
+import Article from "./pages/Article";
 import socket from "./sockets";
 
 function App() {
@@ -55,6 +56,11 @@ function App() {
       {user && <Navbar />}
 
       <Routes>
+        <Route
+          exact
+          path="/Articles"
+          element={user ? <Article user={user} /> : <Login setUser={setUser} />}
+        />
         <Route
           exact
           path="/"
