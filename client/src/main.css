@@ -6,7 +6,7 @@
 position: relative;
   width: 100%;
   height: 100%;
-}   
+} 
 .login::before{
   content: '';
   position: absolute;
@@ -20,18 +20,19 @@ position: relative;
   opacity: 0.5; /* Adjust this value (0 = transparent, 1 = opaque) */
   z-index: -1; /* Ensures the background stays behind content */
 }
-.body{
-    background: #000;
+.root{
+    background: #000000;
 }
 .Post{
     border-radius: 5px;
-    margin-top: 4px;
-    padding-top: 4px;
-    padding-bottom: 3px;
+    margin: 1rem;
+    padding-bottom: 5px;
     background-color: rgb(255, 255, 255);
 }
 .LikeButton{
     border: none;
+    height: 100%;
+    width: 50%;
 }
 .Caption{
     font-size: small;
@@ -42,9 +43,12 @@ position: relative;
 .CaptionBox{
     margin: 2px;
     padding: 2px;
+    
 }
 .CommentBox{
     border: none;
+        height: 100%;
+    width: 50%;
 }
 .login{
     background: linear-gradient(90deg, #00C9FF 0%, #92FE9D 100%);
@@ -61,4 +65,47 @@ position: relative;
 }
 .ProfileCaption{
     font-size: small;
+}
+.navbar{
+    background: #4b8dff;
+}
+.card-header{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+}
+.user-logo{
+    /* margin-right: 4px; */
+    margin-right:0.5rem;
+    height: 2rem;
+    width: 2rem;
+}
+.user-logo-profile{
+    margin-right: -11em;
+    height: 2rem;
+    width: 2rem;
+}
+.FooterPost{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: end;
+}
+.Profile{
+    display: flex;
+    
+}
+.UpdateBio{
+    display: flex;
+    flex-direction: column;
+}
+.Feed-Post-header{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    justify-content: space-between;
 }

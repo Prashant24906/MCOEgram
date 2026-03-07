@@ -6,6 +6,7 @@ import Navbar from "./components/Navbar";
 import Profile from "./pages/Profile";
 import ChatsPage from "./pages/ChatPage";
 import Feed from "./pages/Feed";
+import Article from "./pages/Article";
 import socket from "./sockets";
 
 function App() {
@@ -25,7 +26,7 @@ function App() {
         const res = await api.get("/api/users/me");
         setUser(res.data);
       } catch (err) {
-        console.log("Not logged in");
+        alert("Not logged in");
       } finally {
         setLoading(false);
       }
@@ -48,13 +49,18 @@ function App() {
     };
   }, [user]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div>Backend is starting Please wait....</div>;
 
   return (
     <>
       {user && <Navbar />}
 
       <Routes>
+        <Route
+          exact
+          path="/Articles"
+          element={user ? <Article user={user} /> : <Login setUser={setUser} />}
+        />
         <Route
           exact
           path="/"

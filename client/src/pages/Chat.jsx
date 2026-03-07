@@ -9,7 +9,7 @@ function Chat({ currentUser, selectedUserName, selectedUserID, receiverId }) {
   const [messages, setMessages] = useState([]);
   const history = useNavigate(null);
 
-  // Format time
+  // format time
   const formatTime = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString([], {
@@ -18,7 +18,7 @@ function Chat({ currentUser, selectedUserName, selectedUserID, receiverId }) {
     });
   };
 
-  // SOCKET LISTENER
+  // socket listner
   useEffect(() => {
     const handleReceiveMessage = (data) => {
       setMessages((prev) => {
@@ -61,12 +61,12 @@ function Chat({ currentUser, selectedUserName, selectedUserID, receiverId }) {
     socket.emit("chat_opened", { receiverId });
   }, [receiverId]);
 
-  // AUTO SCROLL 
+  // auto scroll after msg is sent 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // FETCH OLD MESSAGES
+  // older messages fetching
   useEffect(() => {
     if (!receiverId) return;
 
@@ -75,36 +75,23 @@ function Chat({ currentUser, selectedUserName, selectedUserID, receiverId }) {
         const res = await api.get(`/api/chat/${receiverId}`);
         setMessages(res.data);
       } catch (err) {
-        console.error("Error fetching messages:", err);
+        alert("Error fetching messages:", err);
       }
     };
 
     fetchMessages();
   }, [receiverId]);
 
-  const sendMessage = () => {
-    if (!message.trim() || !receiverId) return;
+const sendMessage = () => {
+  if (!message.trim() || !receiverId) return;
 
-    const tempId = Date.now().toString();
-
-    const optimisticMessage = {
-      _id: tempId,
-      sender: currentUser._id,
-      text: message,
-      createdAt: new Date(),
-      delivered: false,
-      seen: false,
-    };
-
-    setMessages((prev) => [...prev, optimisticMessage]);
-
-    socket.emit("send_message", {
-      receiverId,
-      text: message,
-    });
-
-    setMessage("");
-  };
+  socket.emit("send_message", {
+    receiverId,
+    text: message,
+  });
+  setMessage("");
+  fetchMessages();
+};
 
   return (
     <>

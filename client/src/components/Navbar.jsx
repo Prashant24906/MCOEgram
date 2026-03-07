@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import socket from "../sockets";
-
+import "../main.css";
 function Navbar() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -12,9 +12,9 @@ function Navbar() {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg bg-dark border-bottom border-body" data-bs-theme="dark">
-      <div className="container-fluid">
-        <NavLink className="navbar-brand" to="/feed">
+    <nav className="navbar navbar-expand-lg border-bottom border-body" data-bs-theme="dark">
+      <div className="container-fluid ">
+        <NavLink className="navbar-brand"to={localStorage.getItem('token')?"/feed":"/login"}>
           MCOEGRAM
         </NavLink>
 
@@ -30,10 +30,17 @@ function Navbar() {
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <NavLink className="nav-link" to={localStorage.getItem('token')?"/feed":"/login"}>
-                <i className="fa-solid fa-house"></i> Home
+              <NavLink className="nav-link" to={localStorage.getItem('token')?"/Articles":"/login"}>
+                <i className="fa-solid fa-blog"></i> Articles
               </NavLink>
             </li>
+            
+            <li className="nav-item">
+              <NavLink className="nav-link" to={localStorage.getItem('token')?"/feed":"/login"}>
+                <i className="fa-solid fa-house"></i> Posts
+              </NavLink>
+            </li>
+            
 
             <li className="nav-item">
               <NavLink className="nav-link" to={localStorage.getItem('token')?"/chats":"/login"}>

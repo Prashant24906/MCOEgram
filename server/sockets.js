@@ -12,7 +12,7 @@ module.exports = function (server) {
     },
   });
 
-  // ================= AUTH MIDDLEWARE =================
+  // auth middleware
   io.use((socket, next) => {
     try {
       const token = socket.handshake.auth.token;
@@ -25,14 +25,14 @@ module.exports = function (server) {
     }
   });
 
-  // ================= CONNECTION =================
+  //connection
   io.on("connection", (socket) => {
-    console.log("User connected:", socket.userId);
+    const userId = socket.userId;
 
     // Join room = userId
-    socket.join(socket.userId);
+    socket.join(userId);
 
-    // ================= SEND MESSAGE =================
+    // send msg
     socket.on("send_message", async ({ receiverId, text }) => {
       try {
         if (!receiverId || !mongoose.Types.ObjectId.isValid(receiverId)) return;
@@ -52,8 +52,8 @@ module.exports = function (server) {
 
         // Save message
         const message = await Message.create({
-          chat: chat._id,
           sender: socket.userId,
+          receiver: receiverId,
           text,
           delivered: false,
           seen: false,
@@ -62,16 +62,27 @@ module.exports = function (server) {
         // Send to receiver
         io.to(receiverId).emit("receive_message", message);
 
-        // Notify sender message delivered
-        io.to(socket.userId).emit("message_delivered", {
-          messageId: message._id,
-        });
+        // Tell sender message is sent
+        io.to(socket.userId).emit("receive_message", message);
+
+        // If receiver is online → mark delivered
+        const receiverSockets = await io.in(receiverId).fetchSockets();
+
+        if (receiverSockets.length > 0) {
+          await Message.findByIdAndUpdate(message._id, {
+            delivered: true,
+          });
+
+          io.to(socket.userId).emit("message_delivered", {
+            messageId: message._id,
+          });
+        }
       } catch (err) {
         console.error(err);
       }
     });
 
-    // ================= CHAT OPENED (MARK SEEN) =================
+    //chat opened
     socket.on("chat_opened", async ({ receiverId }) => {
       try {
         // Find unseen messages sent by receiver

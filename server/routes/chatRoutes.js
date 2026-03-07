@@ -27,7 +27,6 @@ router.get("/", protect, async (req, res) => {
         };
       })
     );
-
     res.json(chatsWithLastMessage);
 
   } catch (err) {
@@ -40,17 +39,14 @@ router.get("/:userId", protect, async (req, res) => {
   try {
     const otherUserId = req.params.userId;
 
-    // 🔥 Validate ObjectId FIRST
+    // validate ObjectId FIRST
     if (!mongoose.Types.ObjectId.isValid(otherUserId)) {
       return res.status(400).json({ message: "Invalid user ID" });
     }
-    
     const chat = await Chat.findOne({
       participants: { $all: [req.user._id, otherUserId] }
     });
-
     if (!chat) return res.json([]);
-
     const messages = await Message.find({ chat: chat._id })
       .sort({ createdAt: 1 });
 

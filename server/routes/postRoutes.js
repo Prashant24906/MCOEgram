@@ -1,14 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Post = require("../models/Post");
+const Article = require("../models/Article");
 const { protect } = require("../middlewares/authMiddleware");
 const upload = require("../middlewares/uploadMiddleware");
-const { createPost, getPosts, toggleLike, addComment } =  require("../controllers/postController");
-
-router.get("/", protect, getPosts);
-router.post("/", protect, upload.single("image"), createPost);
-router.post("/:id/comment", protect, addComment);
-router.put("/:id/like", protect, toggleLike);
+const { createPost, getPosts, toggleLike, addComment ,createArticle,getArticle,toggleArticleLike,addArticleComment} =  require("../controllers/postController");
 
 router.get("/user/:userId", async (req, res) => {
   try {
@@ -29,5 +25,46 @@ router.get("/user/:userId", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+router.get("/", protect, getPosts);
+router.post("/", protect, upload.single("image"), createPost);
+router.post("/:id/comment", protect, addComment);
+router.put("/:id/like", protect, toggleLike);
+router.delete("/delete/:postId", protect,async (req, res) => {
+  console.log(req.params.postId)
+      try {
+    // Find the post
+    var post = await Post.findById(req.params.postId)
+    if(!post) return res.status(404).json("Not found")
+    if(post.user.toString()!==req.user.id) {
+        return res.status(401).send("Not Allowed")
+    }
+    const status = await post.deleteOne()
+    res.json(status);
+    } catch (error) {
+      res.status(400).json({ error: "Some error occured" });
+    }
+});
+
+router.delete("/article/delete/:articleId", protect,async (req, res) => {
+  console.log(req.params.articleId)
+      try {
+    // Find the post
+    var article = await Article.findById(req.params.articleId)
+    if(!article) return res.status(404).json("Not found")
+    if(article.user.toString()!==req.user.id) {
+        return res.status(401).send("Not Allowed")
+    }
+    const status = await article.deleteOne()
+    res.json(status);
+    } catch (error) {
+      res.status(400).json({ error: "Some error occured" });
+    }
+});
+router.get("/article", protect, getArticle);
+router.post("/article", protect, createArticle);
+router.post("/article/:id/comment", protect, addArticleComment);
+router.put("/article/:id/like", protect, toggleArticleLike);
+
 
 module.exports = router;
