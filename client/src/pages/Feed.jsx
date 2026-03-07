@@ -117,6 +117,7 @@ function Feed({ user }) {
                       </button>
                       <ul className="dropdown-menu">
                         <li
+                          type="button"
                           className="dropdown-item"
                           onClick={async () => {
                             await api.delete(`/api/posts/delete/${post._id}`);
