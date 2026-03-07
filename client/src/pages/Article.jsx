@@ -102,7 +102,7 @@ function Article({ user }) {
                       </button>
                       <ul className="dropdown-menu">
                         <li
-                          type = "button"
+                          type="button"
                           className="dropdown-item Delete-Button"
                           onClick={async () => {
                             await api.delete(
@@ -113,7 +113,7 @@ function Article({ user }) {
                             );
                           }}
                         >
-                         Delete
+                          Delete
                         </li>
                       </ul>
                     </div>
@@ -211,6 +211,7 @@ function Article({ user }) {
             <div className="modal-body">
               {selectedArticle && (
                 <>
+                  {/* Add Comment Input */}
                   <input
                     type="text"
                     className="form-control mb-3"
@@ -227,25 +228,77 @@ function Article({ user }) {
                             p._id === selectedArticle._id
                               ? {
                                   ...p,
-                                  comments: [res.data, ...p.comments],
+                                  comments: [res.data, ...(p.comments || [])],
                                 }
                               : p,
                           ),
                         );
+
                         setselectedArticle((prev) => ({
                           ...prev,
-                          comments: [res.data, ...prev.comments],
+                          comments: [res.data, ...(prev.comments || [])],
                         }));
 
                         e.target.value = "";
                       }
                     }}
                   />
-                  {selectedArticle.comments.map((comment) => (
-                    <div key={comment._id}>
-                      <strong>{comment.user.name}</strong>: {comment.text}
-                    </div>
-                  ))}
+
+                  {/* Comments List */}
+                  {selectedArticle.comments?.length > 0 ? (
+                    selectedArticle.comments.map((comment) => (
+                      <div
+                        key={comment._id}
+                        className="d-flex justify-content-between align-items-start mb-2 p-2 border rounded"
+                      >
+                        <div>
+                          <strong>{comment.user.name}</strong>
+                          <div>{comment.text}</div>
+                        </div>
+
+                        {/* Show delete button only if current user's comment */}
+                        {comment.user._id === user._id && (
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={async () => {
+                              // Optimistic UI removal
+                              setArticles((prev) =>
+                                prev.map((p) =>
+                                  p._id === selectedArticle._id
+                                    ? {
+                                        ...p,
+                                        comments: p.comments.filter(
+                                          (c) => c._id !== comment._id,
+                                        ),
+                                      }
+                                    : p,
+                                ),
+                              );
+
+                              setselectedArticle((prev) => ({
+                                ...prev,
+                                comments: prev.comments.filter(
+                                  (c) => c._id !== comment._id,
+                                ),
+                              }));
+
+                              try {
+                                await api.delete(
+                                  `/api/posts/article/delete/${selectedArticle._id}/comment/${comment._id}`,
+                                );
+                              } catch (err) {
+                                console.error("Delete failed", err);
+                              }
+                            }}
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-muted">No comments yet</p>
+                  )}
                 </>
               )}
             </div>
