@@ -68,7 +68,6 @@ io.use(async (socket, next) => {
 });
 
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.user.name);
   socket.join(socket.user._id.toString());
   socket.on("chat_opened", async ({ chatId }) => {
     try {
@@ -102,7 +101,6 @@ io.on("connection", (socket) => {
 
       onlineUsers.set(userId, socket.id);
 
-      console.log("User connected:", userId);
 
       // Notify everyone
       io.emit("user_online", userId);
@@ -113,7 +111,6 @@ io.on("connection", (socket) => {
       socket.on("disconnect", () => {
         onlineUsers.delete(userId);
         io.emit("user_offline", userId);
-        console.log("User disconnected:", userId);
       });
 
       // 1️⃣ Find or create chat
@@ -180,7 +177,7 @@ io.on("connection", (socket) => {
       // Only send once to sender (without re-emitting later)
       socket.emit("receive_message", payload);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   });
 });

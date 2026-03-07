@@ -74,7 +74,7 @@ exports.addArticleComment = async (req, res) => {
     const { text } = req.body;
 
     const comment = await CommentArticle.create({
-      article: req.params.id, 
+      article: req.params.id,
       user: req.user._id,
       text,
     });
@@ -146,27 +146,36 @@ exports.toggleLike = async (req, res) => {
 
 exports.createPost = async (req, res) => {
   try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No image uploaded" });
+    }
+
     const { caption } = req.body;
 
-    const result = await cloudinary.uploader.upload_stream(
-      { folder: "mcoegram" },
-      async (error, result) => {
-        if (error) {
-          return res.status(500).json({ message: "Upload failed" });
-        }
+    const uploadToCloudinary = () =>
+      new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "mcoegram" },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          },
+        );
 
-        const post = await Post.create({
-          user: req.user._id,
-          imageUrl: result.secure_url,
-          caption,
-        });
+        stream.end(req.file.buffer);
+      });
 
-        res.status(201).json(post);
-      },
-    );
+    const result = await uploadToCloudinary();
 
-    result.end(req.file.buffer);
+    const post = await Post.create({
+      user: req.user._id,
+      imageUrl: result.secure_url,
+      caption,
+    });
+
+    res.status(201).json(post);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Post creation failed" });
   }
 };

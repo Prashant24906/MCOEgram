@@ -8,11 +8,39 @@ import "./feed.css";
 function Feed({ user }) {
   const [posts, setPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [image, setImage] = useState(null);
+  const [Caption, setCaption] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const formData = new FormData();
+      formData.append("image", image);
+      formData.append("caption", Caption);
+
+      const res = await api.post("/api/posts", formData);
+
+      setPosts((prev) =>
+        Array.isArray(prev) ? [res.data, ...prev] : [res.data],
+      );
+
+      setCaption("");
+      setImage(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     const fetchPosts = async () => {
       const res = await api.get("/api/posts");
-      setPosts(res.data);
+
+      if (Array.isArray(res.data)) {
+        setPosts(res.data);
+      } else {
+        setPosts([]); // fallback safety
+      }
     };
 
     fetchPosts();
@@ -52,10 +80,16 @@ function Feed({ user }) {
             </p>
           </div>
         </div>
-
+        <button
+          className="Add-article"
+          data-bs-toggle="modal"
+          data-bs-target="#AddPost"
+        >
+          Add Post
+        </button>
         <div className="posts-container">
           {posts.map((post) => {
-            const isLiked = post.likes.includes(user._id);
+            const isLiked = post.likes?.includes(user._id);
 
             return (
               <article key={post._id} className="post-card">
@@ -128,12 +162,52 @@ function Feed({ user }) {
                     onClick={() => setSelectedPost(post)}
                   >
                     <MessageCircle size={20} />
-                    <span className="action-text">{post.comments.length}</span>
+                    <span className="action-text">{post.comments?post.comments.length:0}</span>
                   </button>
                 </div>
               </article>
             );
           })}
+        </div>
+      </div>
+      {/* Add Post */}
+      <div className="AddArticle">
+        <div className="modal fade" id="AddPost">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5>Add Post</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                ></button>
+              </div>
+
+              <div className="modal-body">
+                <input
+                  type="file"
+                  onChange={(e) => setImage(e.target.files[0])}
+                />
+                <input
+                  type="text"
+                  placeholder="Caption"
+                  value={Caption}
+                  onChange={(e) => setCaption(e.target.value)}
+                />
+              </div>
+
+              <div className="modal-footer">
+                <button
+                  className="btn btn-primary"
+                  onClick={handleSubmit}
+                  data-bs-dismiss="modal"
+                >
+                  Post
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

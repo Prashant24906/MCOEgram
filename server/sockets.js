@@ -114,7 +114,6 @@ module.exports = function (server) {
       }
     });
 
-    // ================= DISCONNECT =================
     socket.on("disconnect", () => {
       console.log("User disconnected:", socket.userId);
     });

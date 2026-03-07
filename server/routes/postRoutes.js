@@ -33,7 +33,6 @@ router.post("/", protect, upload.single("image"), createPost);
 router.post("/:id/comment", protect, addComment);
 router.put("/:id/like", protect, toggleLike);
 router.delete("/delete/:postId", protect,async (req, res) => {
-  console.log(req.params.postId)
       try {
     // Find the post
     var post = await Post.findById(req.params.postId)
@@ -49,14 +48,12 @@ router.delete("/delete/:postId", protect,async (req, res) => {
 });
 router.delete("/delete/:postId/comment/:commentid", protect,async (req, res) => {
   try {
-    console.log(req.params)
     var comment = await Comment.findById(req.params.commentid)
     var post = await Post.findById(req.params.postId)
     if(!comment) return res.status(404).json("Not found")
         if(comment.user.toString()!==req.user.id) {
         return res.status(401).send("Not Allowed")
       }
-      console.log(req.params)
     const status = await comment.deleteOne()
     res.json(req.status);
     } catch (error) {
@@ -66,7 +63,6 @@ router.delete("/delete/:postId/comment/:commentid", protect,async (req, res) => 
 
 
 router.delete("/article/delete/:articleId", protect,async (req, res) => {
-  console.log(req.params.articleId)
       try {
     // Find the post
     var article = await Article.findById(req.params.articleId)
@@ -81,7 +77,6 @@ router.delete("/article/delete/:articleId", protect,async (req, res) => {
     }
 });
 router.delete("/article/delete/:articleId/comment/:commentid", protect,async (req, res) => {
-  console.log(req.params.articleId)
       try {
     var comment = await CommentArticle.findById(req.params.commentid)
     var article = await Article.findById(req.params.articleId)
