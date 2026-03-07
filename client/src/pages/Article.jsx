@@ -232,7 +232,6 @@ function Article({ user }) {
                               : p,
                           ),
                         );
-
                         setselectedArticle((prev) => ({
                           ...prev,
                           comments: [res.data, ...prev.comments],
@@ -242,8 +241,7 @@ function Article({ user }) {
                       }
                     }}
                   />
-
-                  {selectedArticle.comments?.map((comment) => (
+                  {selectedArticle.comments.map((comment) => (
                     <div key={comment._id}>
                       <strong>{comment.user.name}</strong>: {comment.text}
                     </div>

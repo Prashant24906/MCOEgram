@@ -9,7 +9,6 @@ function Feed({ user }) {
   const [posts, setPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
 
-
   useEffect(() => {
     const fetchPosts = async () => {
       const res = await api.get("/api/posts");
@@ -19,10 +18,8 @@ function Feed({ user }) {
     fetchPosts();
   }, []);
 
-
   const toggleLike = async (postId) => {
     setPosts((prev) =>
-      
       prev.map((post) => {
         if (post._id === postId) {
           const alreadyLiked = post.likes.includes(user._id);
@@ -43,8 +40,6 @@ function Feed({ user }) {
       console.error("Like failed", err);
     }
   };
-
-  
 
   return (
     <div className="feed-container">
@@ -191,6 +186,7 @@ function Feed({ user }) {
                   />
 
                   {selectedPost.comments.map((comment) => (
+                    
                     <div key={comment._id}>
                       <strong>{comment.user.name}</strong>: {comment.text}
                     </div>

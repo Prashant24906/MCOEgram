@@ -2,6 +2,7 @@ const cloudinary = require("../config/cloudinary");
 const Post = require("../models/Post");
 const Article = require("../models/Article");
 const Comment = require("../models/Comment");
+const CommentArticle = require("../models/CommentArticle");
 
 exports.getPosts = async (req, res) => {
   try {
@@ -35,7 +36,7 @@ exports.getArticle = async (req, res) => {
       .sort({ createdAt: -1 });
     const WithComments = await Promise.all(
       articles.map(async (article) => {
-        const comments = await Comment.find({ article: article._id })
+        const comments = await CommentArticle.find({ article: article._id })
           .populate("user", "name profilePic")
           .sort({ createdAt: -1 });
 
@@ -72,8 +73,8 @@ exports.addArticleComment = async (req, res) => {
   try {
     const { text } = req.body;
 
-    const comment = await Comment.create({
-      post: req.params.id,
+    const comment = await CommentArticle.create({
+      article: req.params.id, 
       user: req.user._id,
       text,
     });
@@ -81,7 +82,7 @@ exports.addArticleComment = async (req, res) => {
     const populatedComment = await comment.populate("user", "name profilePic");
 
     res.status(201).json(populatedComment);
-  } catch (error) {
+  } catch (err) {
     res.status(500).json({ message: "Comment failed" });
   }
 };
@@ -171,14 +172,14 @@ exports.createPost = async (req, res) => {
 };
 exports.createArticle = async (req, res) => {
   try {
-    const { caption } = req.body||{};
+    const { caption } = req.body || {};
     const article = await Article.create({
       user: req.user._id,
       caption,
     });
     res.status(201).json(article);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({ message: "Article creation failed" });
   }
 };
