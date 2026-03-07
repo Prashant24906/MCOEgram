@@ -89,7 +89,6 @@ exports.createPost = async (req, res) => {
   try {
     const { caption } = req.body;
 
-    // Upload image to Cloudinary
     const result = await cloudinary.uploader.upload_stream(
       { folder: "mcoegram" },
       async (error, result) => {

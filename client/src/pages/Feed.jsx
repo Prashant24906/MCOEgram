@@ -1,14 +1,14 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import api from "../api/axios";
-import Chat from "./Chat";
 import { Link } from "react-router-dom";
+import { Heart, MessageCircle, MoreHorizontal } from "lucide-react";
 import "../main.css";
+import "./feed.css";
 
 function Feed({ user }) {
   const [posts, setPosts] = useState([]);
-  const ref = useRef(null);
   const [selectedPost, setSelectedPost] = useState(null);
-  const [Liked, notLiked] = useState(false);
+
   useEffect(() => {
     const fetchPosts = async () => {
       const res = await api.get("/api/posts");
@@ -18,191 +18,199 @@ function Feed({ user }) {
     fetchPosts();
   }, []);
 
-  const OpenComment = () => {
-    ref.current.click();
+  const toggleLike = async (postId) => {
+    setPosts((prev) =>
+      prev.map((post) => {
+        if (post._id === postId) {
+          const alreadyLiked = post.likes.includes(user._id);
+          return {
+            ...post,
+            likes: alreadyLiked
+              ? post.likes.filter((id) => id !== user._id)
+              : [...post.likes, user._id],
+          };
+        }
+        return post;
+      })
+    );
+
+    try {
+      await api.put(`/api/posts/${postId}/like`);
+    } catch (err) {
+      console.error("Like failed", err);
+    }
   };
 
   return (
-    <div className="container d-flex flex-column align-items-center ">
-      <button
-        type="button"
-        className="btn btn-primary d-none"
-        data-bs-toggle="modal"
-        data-bs-target="#exampleModal"
-        ref={ref}
-      >
-        Launch demo modal
-      </button>
-      <div className="Feed">
-        {posts.map((post) => (
-          <div className="Post" key={post._id} style={{ marginBottom: "20px" }}>
-            <div>
-              <div className="">
-                <div className="Feed-Post-header">
-                  <div className="Feed-Post-First">
+    <div className="feed-container">
+      <div className="feed-wrapper">
+        <div className="feed-header">
+          <div className="header-content">
+            <h1 className="header-title">MCOEGRAM</h1>
+            <p className="header-subtitle">
+              Connect and share with your college
+            </p>
+          </div>
+        </div>
+
+        <div className="posts-container">
+          {posts.map((post) => {
+            const isLiked = post.likes.includes(user._id);
+
+            return (
+              <article key={post._id} className="post-card">
+                <div className="post-header">
+                  <div className="user-info">
                     <img
-                      className="user-logo"
                       src={post.user.profilePic}
-                      width="40"
-                      style={{ borderRadius: "50%" }}
+                      alt={post.user.name}
+                      className="user-avatar"
                     />
-                    <strong>
-                      <span className=" UserName">
-                        <Link to={`/profile/${post.user._id}`}>
-                          {post.user.name}
-                        </Link>
-                      </span>
-                    </strong>
+                    <div className="user-details">
+                      <Link
+                        to={`/profile/${post.user._id}`}
+                        className="username"
+                      >
+                        {post.user.name}
+                      </Link>
+                    </div>
                   </div>
-                  <div className="Feed-Post-Second">
-                    {post.user._id === user._id && (
-                      <div className="dropdown">
-                        <button
-                          className="more"
-                          type="button"
-                          style={{ border: "none", background: 0 }}
-                          data-bs-toggle="dropdown"
+
+                  {post.user._id === user._id && (
+                    <div className="dropdown">
+                      <button
+                        className="menu-button"
+                        data-bs-toggle="dropdown"
+                      >
+                        <MoreHorizontal size={20} />
+                      </button>
+                      <ul className="dropdown-menu">
+                        <li
+                          className="dropdown-item"
+                          onClick={async () => {
+                            await api.delete(
+                              `/api/posts/delete/${post._id}`
+                            );
+                            setPosts((prev) =>
+                              prev.filter((p) => p._id !== post._id)
+                            );
+                          }}
                         >
-                          <i className="fa-solid fa-ellipsis-vertical"></i>
-                        </button>
-                        <ul className="dropdown-menu">
-                          <li
-                            className="dropdown-item"
-                            onClick={async () => {
-                              try {
-                                await api.delete(
-                                  `/api/posts/delete/${post._id}`,
-                                );
-                              } catch (err) {
-                                alert("Like failed:", err);
-                              }
-                            }}
-                          >
-                            Delete
-                          </li>
-                        </ul>
-                      </div>
-                    )}
-                  </div>
+                          Delete
+                        </li>
+                      </ul>
+                    </div>
+                  )}
                 </div>
-                <div className="card-body">
+                {/* <div className="post-image-wrapper"> */}
                   <img
                     src={post.imageUrl}
-                    width="350"
-                    style={{ display: "block", marginTop: "10px" }}
+                    className="post-image"
                   />
-                  <h5 className="card-title d-flex CaptionBox">
-                    <p className="CaptionName">{post.user.name}: </p>
-                    <p className="Caption">{post.caption}</p>
-                  </h5>
-                  <div className="FooterPost">
-                    <button
-                      className="LikeButton"
-                      onClick={async () => {
-                        const updatedPosts = posts.map((p) => {
-                          if (p._id === post._id) {
-                            const alreadyLiked = p.likes.includes(user._id);
+                {/* </div> */}
 
-                            return {
-                              ...p,
-                              likes: alreadyLiked
-                                ? p.likes.filter((id) => id !== user._id)
-                                : [...p.likes, user._id],
-                            };
-                          }
-                          return p;
-                        });
-
-                        setPosts(updatedPosts);
-
-                        try {
-                          await api.put(`/api/posts/${post._id}/like`);
-                        } catch (err) {
-                          alert("Like failed:", err);
-                        }
-                      }}
-                    >
-                      <i
-                        className={
-                          post.likes.includes(user._id)
-                            ? "fa-solid fa-thumbs-up"
-                            : "fa-regular fa-thumbs-up"
-                        }
-                      ></i>{" "}
-                      {post.likes.length}
-                    </button>
-                    <button
-                      className="CommentBox"
-                      data-bs-toggle="modal"
-                      data-bs-target="#commentModal"
-                      onClick={() => setSelectedPost(post)}
-                    >
-                      <i className="fa-regular fa-comment"></i>
-                      {post.comments.length}
-                    </button>
-                  </div>
+                <div className="post-caption">
+                  <p className="caption-text">
+                    <strong>{post.user.name}</strong> {post.caption}
+                  </p>
                 </div>
-              </div>
-            </div>
-          </div>
-        ))}
-        <div
-          className="modal fade"
-          id="commentModal"
-          tabIndex="-1"
-          aria-hidden="true"
-        >
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Comments</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  data-bs-dismiss="modal"
-                ></button>
-              </div>
 
-              <div className="modal-body">
-                {selectedPost && (
-                  <>
-                    <input
-                      type="text"
-                      className="form-control mb-3"
-                      placeholder="Add comment..."
-                      onKeyDown={async (e) => {
-                        if (e.key === "Enter" && e.target.value.trim()) {
-                          const res = await api.post(
-                            `/api/posts/${selectedPost._id}/comment`,
-                            { text: e.target.value },
-                          );
-
-                          setPosts((prev) =>
-                            prev.map((p) =>
-                              p._id === selectedPost._id
-                                ? { ...p, comments: [res.data, ...p.comments] }
-                                : p,
-                            ),
-                          );
-
-                          setSelectedPost((prev) => ({
-                            ...prev,
-                            comments: [res.data, ...prev.comments],
-                          }));
-
-                          e.target.value = "";
-                        }
-                      }}
-                      
+                <div className="post-actions">
+                  <button
+                    className={`action-button like-button ${
+                      isLiked ? "liked" : ""
+                    }`}
+                    onClick={() => toggleLike(post._id)}
+                  >
+                    <Heart
+                      size={20}
+                      className={isLiked ? "heart-filled" : ""}
                     />
-                    {selectedPost.comments.map((comment) => (
-                      <div key={comment._id}>
-                        <strong>{comment.user.name}</strong>: {comment.text}
-                      </div>
-                    ))}
-                  </>
-                )}
-              </div>
+                    <span className="action-text">
+                      {post.likes.length}
+                    </span>
+                  </button>
+
+                  <button
+                    className="action-button comment-button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#commentModal"
+                    onClick={() => setSelectedPost(post)}
+                  >
+                    <MessageCircle size={20} />
+                    <span className="action-text">
+                      {post.comments.length}
+                    </span>
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Comment Modal */}
+      <div className="modal fade" id="commentModal">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5>Comments</h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+
+            <div className="modal-body">
+              {selectedPost && (
+                <>
+                  <input
+                    type="text"
+                    className="form-control mb-3"
+                    placeholder="Add comment..."
+                    onKeyDown={async (e) => {
+                      if (e.key === "Enter" && e.target.value.trim()) {
+                        const res = await api.post(
+                          `/api/posts/${selectedPost._id}/comment`,
+                          { text: e.target.value }
+                        );
+
+                        setPosts((prev) =>
+                          prev.map((p) =>
+                            p._id === selectedPost._id
+                              ? {
+                                  ...p,
+                                  comments: [
+                                    res.data,
+                                    ...p.comments,
+                                  ],
+                                }
+                              : p
+                          )
+                        );
+
+                        setSelectedPost((prev) => ({
+                          ...prev,
+                          comments: [
+                            res.data,
+                            ...prev.comments,
+                          ],
+                        }));
+
+                        e.target.value = "";
+                      }
+                    }}
+                  />
+
+                  {selectedPost.comments.map((comment) => (
+                    <div key={comment._id}>
+                      <strong>{comment.user.name}</strong>:{" "}
+                      {comment.text}
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           </div>
         </div>
