@@ -98,6 +98,7 @@ html, body {
 
 /* Post Card */
 .post-card {
+  height: inherit;
   background-color: var(--bg-white);
   border-radius: 12px;
   overflow: hidden;
