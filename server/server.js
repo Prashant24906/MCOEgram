@@ -113,7 +113,7 @@ io.on("connection", (socket) => {
         io.emit("user_offline", userId);
       });
 
-      // 1️⃣ Find or create chat
+      //  Find or create chat
       let chat = await Chat.findOne({
         participants: { $all: [socket.user._id, receiverId] },
       });
@@ -124,14 +124,14 @@ io.on("connection", (socket) => {
         });
       }
 
-      // 2️⃣ Save message
+      //  Save message
       const message = await Message.create({
         chat: chat._id,
         sender: socket.user._id,
         text,
       });
 
-      // 3️⃣ Emit to receiver
+      //  Emit to receiver
       const payload = {
         _id: message._id,
         chatId: chat._id,
@@ -140,9 +140,7 @@ io.on("connection", (socket) => {
         createdAt: message.createdAt,
         delivered: false,
       };
-
       const receiverSocketId = onlineUsers.get(receiverId);
-
       if (receiverSocketId) {
         // Receiver is online → mark delivered
         message.delivered = true;
@@ -160,12 +158,10 @@ io.on("connection", (socket) => {
         // Receiver offline
         io.to(receiverId).emit("receive_message", payload);
       }
-
       // Always emit to sender
       // Always send message to receiver
       if (receiverSocketId) {
         io.to(receiverSocketId).emit("receive_message", payload);
-
         // Tell sender it was delivered
         socket.emit("message_delivered", {
           messageId: message._id,
@@ -173,7 +169,6 @@ io.on("connection", (socket) => {
       } else {
         io.to(receiverId).emit("receive_message", payload);
       }
-
       // Only send once to sender (without re-emitting later)
       socket.emit("receive_message", payload);
     } catch (err) {

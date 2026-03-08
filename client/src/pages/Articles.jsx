@@ -1,23 +1,29 @@
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-import { Link } from "react-router-dom";
+import "../style/Articles.css";
 import { Heart, MessageCircle, MoreHorizontal } from "lucide-react";
-import "../main.css";
-import "./feed.css";
-
-function Article({ user }) {
+import Navbar from "../components/Navbar";
+function Articles({ user }) {
+  const { userId } = useParams();
   const [articles, setArticles] = useState([]);
   const [selectedArticle, setselectedArticle] = useState(null);
+  const [profileUser, setProfileUser] = useState(null);
   const [Caption, setcaption] = useState("");
-
-
+  const effectiveUserId = userId || user?._id;
   useEffect(() => {
-    const fetchArticle = async () => {
-      const res = await api.get("/api/posts/article");
-      setArticles(res.data);
+    const fetchProfileData = async () => {
+      const [userRes, postRes] = await Promise.all([
+        api.get(`/api/users/${effectiveUserId}`),
+        api.get(`/api/posts/article`),
+      ]);
+      setProfileUser(userRes.data);
+      const filteredPosts = postRes.data.filter(
+        (article) => article.user && article.user._id === effectiveUserId,
+      );
+      setArticles(filteredPosts);
     };
-
-    fetchArticle();
+    fetchProfileData();
   }, []);
 
   const PostArticle = async () => {
@@ -56,30 +62,15 @@ function Article({ user }) {
   };
 
   return (
-    <div className="feed-container">
-      <div className="feed-wrapper">
-        <div className="feed-header">
-          <div className="header-content">
-            <h1 className="header-title">MCOEGRAM</h1>
-            <p className="header-subtitle">
-              Connect and share with your college
-            </p>
-          </div>
-        </div>
-        <button
-          className="Add-article"
-          data-bs-toggle="modal"
-          data-bs-target="#EditProfile"
-        >
-          Add Article
-        </button>
+    <>
+        
         <div className="Article-container">
           {articles.map((article) => {
             const isLiked = article.likes?.includes(user._id);
 
             return (
-              <article key={article._id} className="article-card">
-                <div className="post-header">
+              <article key={article._id} className="article-card-profile">
+                <div className="post-header-profile">
                   <div className="user-info">
                     <img
                       src={article.user.profilePic}
@@ -120,7 +111,7 @@ function Article({ user }) {
                     </div>
                   )}
                 </div>
-                <div className="post-caption">
+                <div className="post-caption-profile">
                   <p className="caption-text">
                     <strong>{article.user.name}</strong> {article.caption}
                   </p>
@@ -157,46 +148,7 @@ function Article({ user }) {
               </article>
             );
           })}
-        </div>
-      </div>
-      <div className="AddArticle">
-        <div className="modal fade" id="EditProfile">
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5>Add Article</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  data-bs-dismiss="modal"
-                ></button>
-              </div>
-
-              <div className="modal-body">
-                <input
-                  type="text"
-                  name="Caption"
-                  value={Caption}
-                  onChange={onChange}
-                  className="form-control mb-3"
-                  placeholder="Whats your thought"
-                />
-              </div>
-
-              <div className="modal-footer">
-                <button
-                  className="btn btn-primary"
-                  onClick={PostArticle}
-                  data-bs-dismiss="modal"
-                >
-                  Post
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Comment Modal */}
+  
       <div className="modal fade" id="commentModal">
         <div className="modal-dialog">
           <div className="modal-content">
@@ -212,7 +164,6 @@ function Article({ user }) {
             <div className="modal-body">
               {selectedArticle && (
                 <>
-                  {/* Add Comment Input */}
                   <input
                     type="text"
                     className="form-control mb-3"
@@ -245,7 +196,6 @@ function Article({ user }) {
                     }}
                   />
 
-                  {/* Comments List */}
                   {selectedArticle.comments?.length > 0 ? (
                     selectedArticle.comments.map((comment) => (
                       <div
@@ -257,12 +207,10 @@ function Article({ user }) {
                           <div>{comment.text}</div>
                         </div>
 
-                        {/* Show delete button only if current user's comment */}
                         {comment.user._id === user._id && (
                           <button
                             className="btn btn-sm btn-danger"
                             onClick={async () => {
-                              // Optimistic UI removal
                               setArticles((prev) =>
                                 prev.map((p) =>
                                   p._id === selectedArticle._id
@@ -307,7 +255,8 @@ function Article({ user }) {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
-export default Article;
+export default Articles;

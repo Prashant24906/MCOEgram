@@ -3,73 +3,60 @@ import api from "../api/axios";
 import { Link } from "react-router-dom";
 import { Heart, MessageCircle, MoreHorizontal } from "lucide-react";
 import "../main.css";
-import "./feed.css";
+import "../style/feed.css";
+import Navbar from "../components/Navbar";
+function ArticlesPage({ user }) {
+  const [articles, setArticles] = useState([]);
+  const [selectedArticle, setselectedArticle] = useState(null);
+  const [Caption, setcaption] = useState("");
 
-function Feed({ user }) {
-  const [posts, setPosts] = useState([]);
-  const [selectedPost, setSelectedPost] = useState(null);
-  const [image, setImage] = useState(null);
-  const [Caption, setCaption] = useState("");
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      const formData = new FormData();
-      formData.append("image", image);
-      formData.append("caption", Caption);
-
-      const res = await api.post("/api/posts", formData);
-
-      setPosts((prev) =>
-        Array.isArray(prev) ? [res.data, ...prev] : [res.data],
-      );
-
-      setCaption("");
-      setImage(null);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      const res = await api.get("/api/posts");
-
-      if (Array.isArray(res.data)) {
-        setPosts(res.data);
-      } else {
-        setPosts([]); // fallback safety
-      }
+    const fetchArticle = async () => {
+      const res = await api.get("/api/posts/article");
+      setArticles(res.data);
     };
 
-    fetchPosts();
+    fetchArticle();
   }, []);
 
-  const toggleLike = async (postId) => {
-    setPosts((prev) =>
-      prev.map((post) => {
-        if (post._id === postId) {
-          const alreadyLiked = post.likes.includes(user._id);
+  const PostArticle = async () => {
+    const response = await api.post("/api/posts/article", {
+      caption: Caption,
+    });
+    setArticles((prev) => [response.data, ...prev]);
+    setcaption("");
+  };
+
+  const onChange = (e) => {
+    setcaption(e.target.value);
+  };
+
+  const toggleArticleLike = async (articleId) => {
+    setArticles((prev) =>
+      prev.map((article) => {
+        if (article._id === articleId) {
+          const alreadyLiked = article.likes?.includes(user._id);
           return {
-            ...post,
+            ...article,
             likes: alreadyLiked
-              ? post.likes.filter((id) => id !== user._id)
-              : [...post.likes, user._id],
+              ? article.likes.filter((id) => id !== user._id)
+              : [...article.likes, user._id],
           };
         }
-        return post;
+        return article;
       }),
     );
 
     try {
-      await api.put(`/api/posts/${postId}/like`);
+      await api.put(`/api/posts/article/${articleId}/like`);
     } catch (err) {
       console.error("Like failed", err);
     }
   };
 
-  return (
+  return (<>
+    {user&&<Navbar />}
     <div className="feed-container">
       <div className="feed-wrapper">
         <div className="feed-header">
@@ -83,34 +70,34 @@ function Feed({ user }) {
         <button
           className="Add-article"
           data-bs-toggle="modal"
-          data-bs-target="#AddPost"
+          data-bs-target="#EditProfile"
         >
-          Add Post
+          Add Article
         </button>
-        <div className="posts-container">
-          {posts.map((post) => {
-            const isLiked = post.likes?.includes(user._id);
+        <div className="Article-container">
+          {articles.map((article) => {
+            const isLiked = article.likes?.includes(user._id);
 
             return (
-              <article key={post._id} className="post-card">
+              <article key={article._id} className="article-card">
                 <div className="post-header">
                   <div className="user-info">
                     <img
-                      src={post.user.profilePic}
-                      alt={post.user.name}
+                      src={article.user.profilePic}
+                      alt={article.user.name}
                       className="user-avatar"
                     />
                     <div className="user-details">
                       <Link
-                        to={`/profile/${post.user._id}`}
+                        to={`/profile/${article.user._id}`}
                         className="username"
                       >
-                        {post.user.name}
+                        {article.user.name}
                       </Link>
                     </div>
                   </div>
 
-                  {post.user._id === user._id && (
+                  {article.user._id === user._id && (
                     <div className="dropdown">
                       <button className="menu-button" data-bs-toggle="dropdown">
                         <MoreHorizontal size={20} />
@@ -118,11 +105,13 @@ function Feed({ user }) {
                       <ul className="dropdown-menu">
                         <li
                           type="button"
-                          className="dropdown-item"
+                          className="dropdown-item Delete-Button"
                           onClick={async () => {
-                            await api.delete(`/api/posts/delete/${post._id}`);
-                            setPosts((prev) =>
-                              prev.filter((p) => p._id !== post._id),
+                            await api.delete(
+                              `/api/posts/article/delete/${article._id}`,
+                            );
+                            setArticles((prev) =>
+                              prev.filter((p) => p._id !== article._id),
                             );
                           }}
                         >
@@ -132,13 +121,9 @@ function Feed({ user }) {
                     </div>
                   )}
                 </div>
-                {/* <div className="post-image-wrapper"> */}
-                <img src={post.imageUrl} className="post-image" />
-                {/* </div> */}
-
                 <div className="post-caption">
                   <p className="caption-text">
-                    <strong>{post.user.name}</strong> {post.caption}
+                    <strong>{article.user.name}</strong> {article.caption}
                   </p>
                 </div>
 
@@ -147,23 +132,27 @@ function Feed({ user }) {
                     className={`action-button like-button ${
                       isLiked ? "liked" : ""
                     }`}
-                    onClick={() => toggleLike(post._id)}
+                    onClick={() => toggleArticleLike(article._id)}
                   >
                     <Heart
                       size={20}
                       className={isLiked ? "heart-filled" : ""}
                     />
-                    <span className="action-text">{post.likes.length}</span>
+                    <span className="action-text">
+                      {article.likes?.length || 0}
+                    </span>
                   </button>
 
                   <button
                     className="action-button comment-button"
                     data-bs-toggle="modal"
                     data-bs-target="#commentModal"
-                    onClick={() => setSelectedPost(post)}
+                    onClick={() => setselectedArticle(article)}
                   >
                     <MessageCircle size={20} />
-                    <span className="action-text">{post.comments?post.comments.length:0}</span>
+                    <span className="action-text">
+                      {article.comments?.length || 0}
+                    </span>
                   </button>
                 </div>
               </article>
@@ -171,13 +160,12 @@ function Feed({ user }) {
           })}
         </div>
       </div>
-      {/* Add Post */}
       <div className="AddArticle">
-        <div className="modal fade" id="AddPost">
+        <div className="modal fade" id="EditProfile">
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <h5>Add Post</h5>
+                <h5>Add Article</h5>
                 <button
                   type="button"
                   className="btn-close"
@@ -187,21 +175,19 @@ function Feed({ user }) {
 
               <div className="modal-body">
                 <input
-                  type="file"
-                  onChange={(e) => setImage(e.target.files[0])}
-                />
-                <input
                   type="text"
-                  placeholder="Caption"
+                  name="Caption"
                   value={Caption}
-                  onChange={(e) => setCaption(e.target.value)}
+                  onChange={onChange}
+                  className="form-control mb-3"
+                  placeholder="Whats your thought"
                 />
               </div>
 
               <div className="modal-footer">
                 <button
                   className="btn btn-primary"
-                  onClick={handleSubmit}
+                  onClick={PostArticle}
                   data-bs-dismiss="modal"
                 >
                   Post
@@ -212,7 +198,6 @@ function Feed({ user }) {
         </div>
       </div>
 
-      {/* Comment Modal */}
       <div className="modal fade" id="commentModal">
         <div className="modal-dialog">
           <div className="modal-content">
@@ -226,9 +211,8 @@ function Feed({ user }) {
             </div>
 
             <div className="modal-body">
-              {selectedPost && (
+              {selectedArticle && (
                 <>
-                  {/* Add Comment Input */}
                   <input
                     type="text"
                     className="form-control mb-3"
@@ -236,13 +220,13 @@ function Feed({ user }) {
                     onKeyDown={async (e) => {
                       if (e.key === "Enter" && e.target.value.trim()) {
                         const res = await api.post(
-                          `/api/posts/${selectedPost._id}/comment`,
+                          `/api/posts/article/${selectedArticle._id}/comment`,
                           { text: e.target.value },
                         );
 
-                        setPosts((prev) =>
+                        setArticles((prev) =>
                           prev.map((p) =>
-                            p._id === selectedPost._id
+                            p._id === selectedArticle._id
                               ? {
                                   ...p,
                                   comments: [res.data, ...(p.comments || [])],
@@ -251,7 +235,7 @@ function Feed({ user }) {
                           ),
                         );
 
-                        setSelectedPost((prev) => ({
+                        setselectedArticle((prev) => ({
                           ...prev,
                           comments: [res.data, ...(prev.comments || [])],
                         }));
@@ -261,9 +245,8 @@ function Feed({ user }) {
                     }}
                   />
 
-                  {/* Comments List */}
-                  {selectedPost.comments?.length > 0 ? (
-                    selectedPost.comments.map((comment) => (
+                  {selectedArticle.comments?.length > 0 ? (
+                    selectedArticle.comments.map((comment) => (
                       <div
                         key={comment._id}
                         className="d-flex justify-content-between align-items-start mb-2 p-2 border rounded"
@@ -273,15 +256,14 @@ function Feed({ user }) {
                           <div>{comment.text}</div>
                         </div>
 
-                        {/* Show delete button only if current user's comment */}
                         {comment.user._id === user._id && (
                           <button
                             className="btn btn-sm btn-danger"
                             onClick={async () => {
                               // Optimistic UI removal
-                              setPosts((prev) =>
+                              setArticles((prev) =>
                                 prev.map((p) =>
-                                  p._id === selectedPost._id
+                                  p._id === selectedArticle._id
                                     ? {
                                         ...p,
                                         comments: p.comments.filter(
@@ -292,7 +274,7 @@ function Feed({ user }) {
                                 ),
                               );
 
-                              setSelectedPost((prev) => ({
+                              setselectedArticle((prev) => ({
                                 ...prev,
                                 comments: prev.comments.filter(
                                   (c) => c._id !== comment._id,
@@ -301,7 +283,7 @@ function Feed({ user }) {
 
                               try {
                                 await api.delete(
-                                  `/api/posts/delete/${selectedPost._id}/comment/${comment._id}`,
+                                  `/api/posts/article/delete/${selectedArticle._id}/comment/${comment._id}`,
                                 );
                               } catch (err) {
                                 console.error("Delete failed", err);
@@ -323,7 +305,8 @@ function Feed({ user }) {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
-export default Feed;
+export default ArticlesPage;

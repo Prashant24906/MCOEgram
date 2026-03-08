@@ -3,9 +3,10 @@ import api from "../api/axios";
 import { Link } from "react-router-dom";
 import Chat from "./Chat";
 import socket from "../sockets";
-import { useLocation } from "react-router-dom";
-import "../main.css"
-
+import { useLocation, useNavigate } from "react-router-dom";
+import "../main.css";
+import "../style/ChatPage.css";
+import Navbar from "../components/Navbar";
 function ChatsPage({ user }) {
   const location = useLocation();
   const [chats, setChats] = useState([]);
@@ -13,36 +14,37 @@ function ChatsPage({ user }) {
   const [showUsers, setShowUsers] = useState(false);
   const [users, setUsers] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-  const handleReceive = (data) => {
-    setChats((prevChats) =>
-      prevChats.map((chat) => {
-        if (chat._id === data.chatId) {
-          const isCurrentChatOpen =
-            selectedUser && selectedUser._id === data.sender;
+    const handleReceive = (data) => {
+      setChats((prevChats) =>
+        prevChats.map((chat) => {
+          if (chat._id === data.chatId) {
+            const isCurrentChatOpen =
+              selectedUser && selectedUser._id === data.sender;
 
-          return {
-            ...chat,
-            lastMessage: {
-              text: data.text,
-              createdAt: data.createdAt,
-            },
-            unreadCount:
-              data.sender !== user._id && !isCurrentChatOpen
-                ? chat.unreadCount + 1
-                : chat.unreadCount,
-          };
-        }
-        return chat;
-      })
-    );
-  };
+            return {
+              ...chat,
+              lastMessage: {
+                text: data.text,
+                createdAt: data.createdAt,
+              },
+              unreadCount:
+                data.sender !== user._id && !isCurrentChatOpen
+                  ? chat.unreadCount + 1
+                  : chat.unreadCount,
+            };
+          }
+          return chat;
+        }),
+      );
+    };
 
-  socket.on("receive_message", handleReceive);
+    socket.on("receive_message", handleReceive);
 
-  return () => socket.off("receive_message", handleReceive);
-}, [selectedUser, user]);
+    return () => socket.off("receive_message", handleReceive);
+  }, [selectedUser, user]);
 
   useEffect(() => {
     if (location.state?.selectedUser) {
@@ -109,7 +111,7 @@ function ChatsPage({ user }) {
           const res = await api.get("/api/users");
           setUsers(res.data);
         } catch (err) {
-          alert("Failed to fetch users Please try again")
+          alert("Failed to fetch users Please try again");
         }
       };
 
@@ -130,33 +132,22 @@ function ChatsPage({ user }) {
     fetchChats();
   }, []);
   return (
-    <div
-      style={{
-        display: "flex",
-        height: "100vh",
-        backgroundColor: "#f5f5f5",
-      }}
-    >
-      {/* Sidebar */}
-      <div
-        style={{
-          width: "30%",
-          backgroundColor: "white",
-          borderRight: "1px solid #ddd",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <h3>Chats</h3>
+    <>
+    {user&&<Navbar />}
+    <div className="chat-layout">
+      <div className="chat-sidebar">
+        <h3 className="Chats">Chats</h3>
         <button
+          className="NewChat"
           onClick={() => {
-            setShowUsers(true);
+            showUsers?
+            setShowUsers(false):setShowUsers(true);
           }}
         >
           + New Chat
         </button>
         {showUsers && (
-          <div style={{ marginTop: "10px" }}>
+          <div className="user-select-list">
             {users.length === 0 && <p>No users found</p>}
 
             {users
@@ -164,11 +155,7 @@ function ChatsPage({ user }) {
               .map((user) => (
                 <div
                   key={user._id}
-                  style={{
-                    cursor: "pointer",
-                    padding: "8px",
-                    borderBottom: "1px solid #ccc",
-                  }}
+                  className="user-select-item"
                   onClick={() => {
                     setSelectedUser(user);
                     setShowUsers(false);
@@ -205,25 +192,30 @@ function ChatsPage({ user }) {
           return (
             <div
               key={chat._id}
-              style={{ padding: "10px", cursor: "pointer" }}
+              className = "chats-list"
               onClick={() => setSelectedUser(otherUser)}
             >
               <strong>
-                <Link to={`/profile/${otherUser._id}`}>{otherUser.name}</Link>
+                <span
+                className = "user-list"
+                  onClick={() => navigate(`/profile/${otherUser._id}`)}
+                >
+                  {otherUser.name}
+                </span>
+
                 {onlineUsers.some((id) => id === otherUser._id.toString()) && (
                   <span style={{ color: "green", marginLeft: "6px" }}>●</span>
                 )}
               </strong>
 
               <p style={{ fontSize: "12px", color: "gray" }}>
-                {(chat.lastMessage?.text).slice(0,15) || "No messages yet"}
+                {(chat.lastMessage?.text).slice(0, 15) || "No messages yet"}
               </p>
             </div>
           );
         })}
       </div>
 
-      {/* Chat Window */}
       <div style={{ flex: 1 }}>
         {selectedUser && (
           <Chat
@@ -235,6 +227,7 @@ function ChatsPage({ user }) {
         )}
       </div>
     </div>
+    </>
   );
 }
 

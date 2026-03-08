@@ -1,0 +1,184 @@
+/* ===== Layout ===== */
+
+.chat-layout {
+  display: flex;
+  height: 100vh;
+  background: #111840;
+  font-family: 'Inter', sans-serif;
+}
+.Chats{
+    color: rgb(255, 255, 255);
+    display: flex;
+    align-self: center;
+    justify-self: center;
+    margin: 1rem;
+}
+.user-list{
+    color: white;
+    cursor: pointer;
+}
+.user-list:hover{
+    color: blue;
+    cursor: pointer;
+}
+.chats-list{
+    padding: 10px;
+    border: #25d366;
+    cursor: pointer;
+}
+.NewChat{
+    display: flex;
+    align-self: center;
+    align-items: center;
+    justify-self: center;
+    justify-content: center;
+    border-radius: 10px;
+    height: inherit;
+    width: inherit;
+}
+.chat-sidebar{
+  width: 320px;
+  background-color: #111827;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-sidebar-header {
+  padding: 20px;
+  font-weight: 600;
+  font-size: 18px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.new-chat-btn {
+  background: #25d366;
+  border: none;
+  padding: 6px 12px;
+  color: white;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.new-chat-btn:hover {
+  background: #1ebe5d;
+}
+
+/* ===== Chat List ===== */
+
+.chat-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.chat-item {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid #f3f3f3;
+}
+
+.chat-item:hover {
+  background: #f7f7f7;
+}
+
+.chat-item.active {
+  background: #e8f5ff;
+}
+
+.chat-name {
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chat-preview {
+  font-size: 13px;
+  color: #777;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.online-dot {
+  width: 8px;
+  height: 8px;
+  background: #25d366;
+  border-radius: 50%;
+}
+
+/* ===== Unread Badge ===== */
+
+.unread-badge {
+  background: #25d366;
+  color: white;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  margin-left: auto;
+}
+
+/* ===== Users Popup ===== */
+
+.user-select-list {
+    color: white;
+  max-height: 200px;
+  overflow-y: auto;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+.user-select-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.user-select-item:hover {
+  background: #f3f3f3;
+  color: black;
+}
+
+/* ===== Chat Window ===== */
+
+.chat-window {
+  flex: 1;
+  background: linear-gradient(to bottom, #fdfdfd, #f5f7fb);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Scrollbar Styling ===== */
+
+.chat-list::-webkit-scrollbar,
+.user-select-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-list::-webkit-scrollbar-thumb,
+.user-select-list::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 10px;
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 768px) {
+  .chat-sidebar {
+    width: 100%;
+  }
+
+  .chat-layout {
+    flex-direction: column;
+  }
+}

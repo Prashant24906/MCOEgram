@@ -14,7 +14,7 @@ function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg border-bottom border-body" data-bs-theme="dark">
       <div className="container-fluid ">
-        <NavLink className="navbar-brand"to={localStorage.getItem('token')?"/Articles":"/login"}>
+        <NavLink className="navbar-brand"to={localStorage.getItem('token')?"/ArticlesPage":"/login"}>
           MCOEGRAM
         </NavLink>
 
@@ -30,13 +30,13 @@ function Navbar() {
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <NavLink className="nav-link" to={localStorage.getItem('token')?"/Articles":"/login"}>
+              <NavLink className="nav-link" to={localStorage.getItem('token')?"/ArticlesPage":"/login"}>
                 <i className="fa-solid fa-blog"></i> Articles
               </NavLink>
             </li>
             
             <li className="nav-item">
-              <NavLink className="nav-link" to={localStorage.getItem('token')?"/feed":"/login"}>
+              <NavLink className="nav-link" to={localStorage.getItem('token')?"/PostsPage":"/login"}>
                 <i className="fa-solid fa-house"></i> Posts
               </NavLink>
             </li>

@@ -5,8 +5,9 @@ import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
 import Profile from "./pages/Profile";
 import ChatsPage from "./pages/ChatPage";
-import Feed from "./pages/Feed";
-import Article from "./pages/Article";
+import PostsPage from "./pages/PostsPage";
+import Posts from "./pages/Posts";
+import ArticlesPage from "./pages/ArticlesPage";
 import socket from "./sockets";
 
 function App() {
@@ -53,23 +54,23 @@ function App() {
 
   return (
     <>
-      {user && <Navbar />}
 
+      
       <Routes>
         <Route
           exact
-          path="/Articles"
-          element={user ? <Article user={user} /> : <Login setUser={setUser} />}
+          path="/ArticlesPage"
+          element={user ? <ArticlesPage user={user} /> : <Login setUser={setUser} />}
         />
         <Route
           exact
           path="/"
-          element={user ? <Feed user={user} /> : <Login setUser={setUser} />}
+          element={user ? <ArticlesPage user={user} /> : <Login setUser={setUser} />}
         />
         <Route
           exact
-          path="/feed"
-          element={user ? <Feed user={user} /> : <Login setUser={setUser} />}
+          path="/PostsPage"
+          element={user ? <PostsPage user={user} /> : <Login setUser={setUser} />}
         />
         <Route exact path="/login" element={<Login setUser={setUser} />} />
         <Route
@@ -82,6 +83,10 @@ function App() {
         <Route
           path="/profile/:userId"
           element={<Profile currentUser={user} />}
+        />
+        <Route
+          path="/profile/:userId/Articles"
+          element={<Posts currentUser={user} />}
         />
 
         <Route path="/me" element={<Profile currentUser={user} />} />

@@ -1,9 +1,11 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-import "./ProfilePage.css";
+import "../style/ProfilePage.css";
 import { Heart, MessageCircle, MoreHorizontal } from "lucide-react";
-
+import Posts from "./Posts";
+import Articles from "./Articles";
+import Navbar from "../components/Navbar";
 function Profile({ currentUser }) {
   const { userId } = useParams();
   const navigate = useNavigate();
@@ -13,7 +15,23 @@ function Profile({ currentUser }) {
   const [Credentials, setCredentials] = useState({ name: "", bio: "" });
   const effectiveUserId = userId || currentUser?._id;
   const isOwnProfile = currentUser?._id === effectiveUserId;
+  const [SelectedFeed, setSelectedFeed] = useState("Article");
+  const [articles, setArticles] = useState([]);
 
+  useEffect(() => {
+    const fetchArticles = async () => {
+      const [userRes, postRes] = await Promise.all([
+        api.get(`/api/users/${effectiveUserId}`),
+        api.get(`/api/posts/article`),
+      ]);
+      setProfileUser(userRes.data);
+      const filteredPosts = postRes.data.filter(
+        (article) => article.user && article.user._id === effectiveUserId,
+      );
+      setArticles(filteredPosts);
+    };
+    fetchArticles();
+  }, []);
   useEffect(() => {
     if (!currentUser) return;
 
@@ -39,7 +57,6 @@ function Profile({ currentUser }) {
     fetchProfileData();
   }, [effectiveUserId, currentUser]);
 
-  // Prefill edit modal
   useEffect(() => {
     if (profileUser) {
       setCredentials({
@@ -95,253 +112,127 @@ function Profile({ currentUser }) {
   if (!profileUser) return <div>Loading profile...</div>;
 
   return (
-    <div className="profile-container">
-      {/* HEADER */}
-      <div className="profile-header">
-        <div className="profile-header-content">
-          <div className="profile-pic-wrapper">
-            <img
-              src={profileUser.profilePic}
-              alt={profileUser.name}
-              className="profile-pic"
-            />
-          </div>
+    <>
+      {currentUser && <Navbar />}
+      <div className="ProfileBody">
+        <div className="profile-container">
+          <div className="profile-header">
+            <div className="profile-header-content">
+              <div className="profile-pic-wrapper">
+                <img
+                  src={profileUser.profilePic}
+                  alt={profileUser.name}
+                  className="profile-pic"
+                />
+              </div>
 
-          <div className="profile-info">
-            <div className="profile-top">
-              <h1 className="profile-name">{profileUser.name}</h1>
+              <div className="profile-info">
+                <div className="profile-top">
+                  <h1 className="profile-name">{profileUser.name}</h1>
+                </div>
+                <p className="profile-bio">{profileUser.bio || "No bio yet"}</p>
 
-              {isOwnProfile ? (
-                <button
-                  className="action-button edit-button"
-                  data-bs-toggle="modal"
-                  data-bs-target="#EditProfile"
-                >
-                  Edit Profile
-                </button>
-              ) : (
-                <button
-                  className="action-button message-button"
-                  onClick={navigateToChat}
-                >
-                  Message
-                </button>
-              )}
+                {isOwnProfile ? (
+                  <button
+                    className=" edit-profile-button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#EditProfile"
+                  >
+                    Edit Profile
+                  </button>
+                ) : (
+                  <button
+                    className="edit-profile-button"
+                    onClick={navigateToChat}
+                  >
+                    Message
+                  </button>
+                )}
+
+                <div className="profile-stats">
+                  <div className="stat">
+                    <span className="stat-value">{articles.length}</span>
+                    <span className="stat-label">Articles</span>
+                  </div>
+                  <div className="stat">
+                    <span className="stat-value">{posts.length}</span>
+                    <span className="stat-label">Posts</span>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+          <div className="feed-type">
+            <button
+              className="feed-type-inside"
+              onClick={() => setSelectedFeed("Articles")}
+            >
+              Articles
+            </button>
+            <button
+              className="feed-type-inside"
+              onClick={() => setSelectedFeed("Posts")}
+            >
+              Posts
+            </button>
+          </div>
+          {SelectedFeed === "Posts" ? (
+            <div className="profile-posts">
+              <Posts currentUser={currentUser} />
+            </div>
+          ) : (
+            <div className="profile-article">
+              <Articles user={currentUser} />
+            </div>
+          )}
 
-            <p className="profile-bio">{profileUser.bio || "No bio yet"}</p>
+          <div className="modal fade" id="EditProfile">
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5>Update Profile</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    data-bs-dismiss="modal"
+                  ></button>
+                </div>
 
-            <div className="profile-stats">
-              <div className="stat">
-                <span className="stat-value">{posts.length}</span>
-                <span className="stat-label">Posts</span>
+                <div className="modal-body">
+                  <input
+                    type="text"
+                    name="name"
+                    value={Credentials.name}
+                    onChange={onChange}
+                    className="form-control mb-3"
+                    placeholder="Name"
+                  />
+
+                  <input
+                    type="text"
+                    name="bio"
+                    value={Credentials.bio}
+                    onChange={onChange}
+                    className="form-control"
+                    placeholder="Bio"
+                  />
+                </div>
+
+                <div className="modal-footer">
+                  <button
+                    className="btn btn-primary"
+                    onClick={EditProfile}
+                    data-bs-dismiss="modal"
+                  >
+                    Update
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* POSTS GRID */}
-      <div className="posts-section">
-        <h2 className="posts-title">Posts</h2>
-
-        {posts.length > 0 ? (
-          <div className="profile-posts-grid">
-            {posts.map((post) => {
-              const isLiked = post.likes.includes(currentUser._id);
-              return (
-                <article key={post._id} className="profile-post-card">
-                  <div className="post-header">
-                    <div className="user-info">
-                      <img
-                        src={post.user.profilePic}
-                        alt={post.user.name}
-                        className="user-avatar"
-                      />
-                      <div className="user-details">
-                        <Link
-                          to={`/profile/${post.user._id}`}
-                          className="username"
-                        >
-                          {post.user.name}
-                        </Link>
-                      </div>
-                    </div>
-
-                    {post.user._id === currentUser._id && (
-                      <div className="dropdown">
-                        <button
-                          className="menu-button"
-                          data-bs-toggle="dropdown"
-                        >
-                          <MoreHorizontal size={20} />
-                        </button>
-                        <ul className="dropdown-menu">
-                          <li
-                            className="dropdown-item"
-                            onClick={async () => {
-                              await api.delete(`/api/posts/delete/${post._id}`);
-                              setPosts((prev) =>
-                                prev.filter((p) => p._id !== post._id),
-                              );
-                            }}
-                          >
-                            Delete
-                          </li>
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                  {/* <div className="post-image-wrapper"> */}
-                  <img src={post.imageUrl} className="post-image" />
-                  {/* </div> */}
-
-                  <div className="post-caption">
-                    <p className="caption-text">
-                      <strong>{post.user.name}</strong> {post.caption}
-                    </p>
-                  </div>
-
-                  <div className="post-actions">
-                    <button
-                      className={`action-button like-button ${
-                        isLiked ? "liked" : ""
-                      }`}
-                      onClick={() => toggleLike(post._id)}
-                    >
-                      <Heart
-                        size={20}
-                        className={isLiked ? "heart-filled" : ""}
-                      />
-                      <span className="action-text">{post.likes.length}</span>
-                    </button>
-
-                    <button
-                      className="action-button comment-button"
-                      data-bs-toggle="modal"
-                      data-bs-target="#commentModal"
-                      onClick={() => setSelectedPost(post)}
-                    >
-                      <MessageCircle size={20} />
-                      <span className="action-text">
-                        {post.comments.length}
-                      </span>
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="empty-state">
-            <p>No posts yet</p>
-          </div>
-        )}
-      </div>
-      <div className="modal fade" id="commentModal">
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5>Comments</h5>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-              ></button>
-            </div>
-
-            <div className="modal-body">
-              {selectedPost && (
-                <>
-                  <input
-                    type="text"
-                    className="form-control mb-3"
-                    placeholder="Add comment..."
-                    onKeyDown={async (e) => {
-                      if (e.key === "Enter" && e.target.value.trim()) {
-                        const res = await api.post(
-                          `/api/posts/${selectedPost._id}/comment`,
-                          { text: e.target.value },
-                        );
-
-                        setPosts((prev) =>
-                          prev.map((p) =>
-                            p._id === selectedPost._id
-                              ? {
-                                  ...p,
-                                  comments: [res.data, ...p.comments],
-                                }
-                              : p,
-                          ),
-                        );
-
-                        setSelectedPost((prev) => ({
-                          ...prev,
-                          comments: [res.data, ...prev.comments],
-                        }));
-
-                        e.target.value = "";
-                      }
-                    }}
-                  />
-
-                  {selectedPost.comments.map((comment) => (
-                    <div key={comment._id}>
-                      <strong>{comment.user.name}</strong>: {comment.text}
-                    </div>
-                  ))}
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* EDIT PROFILE MODAL */}
-      <div className="modal fade" id="EditProfile">
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5>Update Profile</h5>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-              ></button>
-            </div>
-
-            <div className="modal-body">
-              <input
-                type="text"
-                name="name"
-                value={Credentials.name}
-                onChange={onChange}
-                className="form-control mb-3"
-                placeholder="Name"
-              />
-
-              <input
-                type="text"
-                name="bio"
-                value={Credentials.bio}
-                onChange={onChange}
-                className="form-control"
-                placeholder="Bio"
-              />
-            </div>
-
-            <div className="modal-footer">
-              <button
-                className="btn btn-primary"
-                onClick={EditProfile}
-                data-bs-dismiss="modal"
-              >
-                Update
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
 

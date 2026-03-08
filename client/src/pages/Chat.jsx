@@ -1,15 +1,16 @@
 import { useEffect, useState, useRef } from "react";
 import socket from "../sockets";
-import { Link ,useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import "../main.css";
+import "../style/Chat.css";
 function Chat({ currentUser, selectedUserName, selectedUserID, receiverId }) {
   const messagesEndRef = useRef(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const history = useNavigate(null);
+  const navigate = useNavigate();
 
-  // format time
   const formatTime = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString([], {
@@ -18,7 +19,6 @@ function Chat({ currentUser, selectedUserName, selectedUserID, receiverId }) {
     });
   };
 
-  // socket listner
   useEffect(() => {
     const handleReceiveMessage = (data) => {
       setMessages((prev) => {
@@ -55,18 +55,15 @@ function Chat({ currentUser, selectedUserName, selectedUserID, receiverId }) {
     };
   }, []);
 
-  //  MARK CHAT OPENED 
   useEffect(() => {
     if (!receiverId) return;
     socket.emit("chat_opened", { receiverId });
   }, [receiverId]);
 
-  // auto scroll after msg is sent 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // older messages fetching
   useEffect(() => {
     if (!receiverId) return;
 
@@ -82,142 +79,128 @@ function Chat({ currentUser, selectedUserName, selectedUserID, receiverId }) {
     fetchMessages();
   }, [receiverId]);
 
-const sendMessage = () => {
-  if (!message.trim() || !receiverId) return;
+  const sendMessage = () => {
+    if (!message.trim() || !receiverId) return;
 
-  socket.emit("send_message", {
-    receiverId,
-    text: message,
-  });
-  setMessage("");
-  fetchMessages();
-};
+    socket.emit("send_message", {
+      receiverId,
+      text: message,
+    });
+    setMessage("");
+    fetchMessages();
+  };
 
   return (
     <>
-    
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100vh",
-        backgroundColor: "#e5ddd5",
-      }}
-    >
-     
-      <div
-        style={{
-          padding: "15px",
-          backgroundColor: "white",
-          borderBottom: "1px solid #ddd",
-          fontWeight: "bold",
-        }}
-      >
-        <Link to={`/profile/${selectedUserID}`}>{selectedUserName}</Link>
-      </div>
-
-
-      <div
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "15px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
-        }}
-      >
-        {messages.map((msg) => (
-          <div
-            key={msg._id}
-            style={{
-              alignSelf:
-                msg.sender === currentUser._id ? "flex-end" : "flex-start",
-              backgroundColor:
-                msg.sender === currentUser._id ? "#dcf8c6" : "white",
-              padding: "8px 12px",
-              borderRadius: "12px",
-              maxWidth: "60%",
-              display: "flex",
-              flexDirection: "column",
-            }}
+      <div className="Chat-layout">
+        <div className="chat-box">
+          <span
+            className="user-list"
+            onClick={() => navigate(`/profile/${selectedUserID}`)}
           >
-            <div>{msg.text}</div>
+            {selectedUserName}
+          </span>
+        </div>
 
-            <div
-              style={{
-                fontSize: "11px",
-                marginTop: "4px",
-                textAlign: "right",
-                color: "gray",
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "center",
-                gap: "4px",
-              }}
-            >
-              <span>{formatTime(msg.createdAt)}</span>
-
-              {msg.sender === currentUser._id && (
-                <span>
-                  {msg.seen ? (
-                    <span style={{ color: "#34B7F1" }}>✓✓</span>
-                  ) : msg.delivered ? (
-                    "✓✓"
-                  ) : (
-                    "✓"
-                  )}
-                </span>
-              )}
-            </div>
-          </div>
-        ))}
-
-        
-        <div ref={messagesEndRef} />
-      </div>
-
-     
-      <div
-        style={{
-          display: "flex",
-          padding: "10px",
-          backgroundColor: "white",
-          borderTop: "1px solid #ddd",
-        }}
-      >
-        <input
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type a message..."
+        <div
           style={{
             flex: 1,
-            padding: "10px",
-            borderRadius: "20px",
-            border: "1px solid #ccc",
-            outline: "none",
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") sendMessage();
-          }}
-        />
-
-        <button
-          onClick={sendMessage}
-          style={{
-            marginLeft: "10px",
-            padding: "8px 16px",
-            borderRadius: "20px",
-            border: "none",
-            backgroundColor: "#25D366",
-            color: "white",
-            cursor: "pointer",
+            overflowY: "auto",
+            padding: "15px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px",
           }}
         >
-          Send
-        </button>
+          {messages.map((msg) => (
+            <div
+              key={msg._id}
+              style={{
+                alignSelf:
+                  msg.sender === currentUser._id ? "flex-end" : "flex-start",
+                backgroundColor:
+                  msg.sender === currentUser._id ? "#dcf8c6" : "white",
+                padding: "8px 12px",
+                borderRadius: "12px",
+                maxWidth: "60%",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <div>{msg.text}</div>
+
+              <div
+                style={{
+                  fontSize: "11px",
+                  marginTop: "4px",
+                  textAlign: "right",
+                  color: "gray",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+              >
+                <span>{formatTime(msg.createdAt)}</span>
+
+                {msg.sender === currentUser._id && (
+                  <span>
+                    {msg.seen ? (
+                      <span style={{ color: "#34B7F1" }}>✓✓</span>
+                    ) : msg.delivered ? (
+                      "✓✓"
+                    ) : (
+                      "✓"
+                    )}
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            padding: "10px",
+            backgroundColor: "#111840",
+            borderTop: "1px solid #ddd",
+          }}
+        >
+          <input
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Type a message..."
+            style={{
+              flex: 1,
+              padding: "10px",
+              borderRadius: "20px",
+              border: "1px solid #ccc",
+              outline: "none",
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") sendMessage();
+            }}
+          />
+
+          <button
+            onClick={sendMessage}
+            style={{
+              marginLeft: "10px",
+              padding: "8px 16px",
+              borderRadius: "20px",
+              border: "none",
+              backgroundColor: "#25D366",
+              color: "white",
+              cursor: "pointer",
+            }}
+          >
+            Send
+          </button>
+        </div>
       </div>
-    </div>
     </>
   );
 }

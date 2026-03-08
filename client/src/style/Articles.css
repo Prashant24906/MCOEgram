@@ -1,0 +1,48 @@
+.article-card-profile {
+  
+  background-color: var(--bg-white);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  transition: var(--transition-smooth);
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+.post-header-profile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+.post-caption-profile {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+@media (max-width: 640px) {
+  .feed-container {
+    padding: 12px 8px;
+  }
+
+  .feed-header {
+    margin-bottom: 24px;
+    padding: 16px 0;
+  }
+
+  .header-title {
+    font-size: 28px;
+  }
+
+  .post-card {
+    border-radius: 10px;
+  }
+
+  .post-header {
+    padding: 12px;
+  }
+
+  .posts-container {
+    gap: 12px;
+  }
+}

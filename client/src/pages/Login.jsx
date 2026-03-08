@@ -31,7 +31,7 @@ function Login({ setUser }) {
 
       localStorage.setItem("token", res.data.token);
       setUser(res.data.user);
-      history("/feed");
+      history("/ArticlesPage");
     } catch (error) {
       alert(error.response?.data?.message|| "Login failed" );
     } finally {
