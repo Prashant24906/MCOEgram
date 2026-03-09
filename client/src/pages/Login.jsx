@@ -3,6 +3,7 @@ import { useState } from "react";
 import api from "../api/axios";
 import { Navigate, Link, useNavigate } from "react-router-dom";
 import "../main.css";
+import "../style/Login.css";
 import UpdateProfile from './UpdateProfile'
 function Login({ setUser }) {
   const [loading, setLoading] = useState(false);
@@ -52,7 +53,8 @@ function Login({ setUser }) {
 };
   return (
     <>
-    
+    <div className="Login-container">
+
       <div className="login">
         <h1>Login to MCOEGRAM</h1>
       <div style={{ textAlign: "center", marginTop: "2rem" }}>
@@ -70,6 +72,7 @@ function Login({ setUser }) {
           </div>
         )}
       </div>
+        </div>
         </div>
     </>
   );

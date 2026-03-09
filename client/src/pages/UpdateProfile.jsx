@@ -24,6 +24,8 @@ export default function UpdateProfile() {
   };
   return (
     <>
+    <div className="Login-container">
+
       <div className="login">
         <h1>Input Details</h1>
         <div style={{ textAlign: "center", marginTop: "2rem" }}>
@@ -35,7 +37,7 @@ export default function UpdateProfile() {
               onChange={onChange}
               className="form-control mb-2"
               placeholder="Name"
-            />
+              />
             <input
               type="text"
               name="bio"
@@ -43,7 +45,7 @@ export default function UpdateProfile() {
               onChange={onChange}
               className="form-control mb-2"
               placeholder="Bio"
-            />
+              />
             <input
               type="text"
               name="department"
@@ -51,7 +53,7 @@ export default function UpdateProfile() {
               onChange={onChange}
               className="form-control mb-2"
               placeholder="Department"
-            />
+              />
             <input
               type="text"
               name="year"
@@ -59,11 +61,11 @@ export default function UpdateProfile() {
               onChange={onChange}
               className="form-control mb-2"
               placeholder="Year"
-            />
+              />
             <button
               className="btn btn-primary "
               onClick={()=>{
-                
+                  
                   (Info.department && Info.name && Info.year && Info.bio)
                   ? (handleSubmit())
                   : (alert("Please fill all the Details"))
@@ -76,6 +78,7 @@ export default function UpdateProfile() {
           </div>
         </div>
       </div>
+                </div>
     </>
   );
 }
