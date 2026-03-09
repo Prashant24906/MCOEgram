@@ -9,11 +9,12 @@ function ArticlesPage({ user }) {
   const [articles, setArticles] = useState([]);
   const [selectedArticle, setselectedArticle] = useState(null);
   const [Caption, setcaption] = useState("");
-
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchArticle = async () => {
       const res = await api.get("/api/posts/article");
       setArticles(res.data);
+      setLoading(false)
     };
 
     fetchArticle();
@@ -74,9 +75,11 @@ function ArticlesPage({ user }) {
           Add Article
         </button>
         <div className="Article-container">
-          {articles.map((article) => {
+          {loading?(<div>Fetching Articles</div>
+        ):
+          (articles.map((article) => {
             const isLiked = article.likes?.includes(user._id);
-
+            
             return (
               <article key={article._id} className="article-card">
                 <div className="post-header">
@@ -111,8 +114,8 @@ function ArticlesPage({ user }) {
                             );
                             setArticles((prev) =>
                               prev.filter((p) => p._id !== article._id),
-                            );
-                          }}
+                          );
+                        }}
                         >
                           Delete
                         </li>
@@ -130,8 +133,8 @@ function ArticlesPage({ user }) {
                   <button
                     className={`action-button like-button ${
                       isLiked ? "liked" : ""
-                    }`}
-                    onClick={() => toggleArticleLike(article._id)}
+                      }`}
+                      onClick={() => toggleArticleLike(article._id)}
                   >
                     <Heart
                       size={20}
@@ -147,7 +150,7 @@ function ArticlesPage({ user }) {
                     data-bs-toggle="modal"
                     data-bs-target="#commentModal"
                     onClick={() => setselectedArticle(article)}
-                  >
+                    >
                     <MessageCircle size={20} />
                     <span className="action-text">
                       {article.comments?.length || 0}
@@ -156,7 +159,8 @@ function ArticlesPage({ user }) {
                 </div>
               </article>
             );
-          })}
+          }))
+        }
         </div>
       </div>
       <div className="AddArticle">
