@@ -12,7 +12,7 @@ function Profile({ currentUser }) {
   const [selectedPost, setSelectedPost] = useState(null);
   const [profileUser, setProfileUser] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [Credentials, setCredentials] = useState({ name: "", bio: "" });
+  const [Credentials, setCredentials] = useState({ name: "", bio: "" ,year:"",department:""});
   const effectiveUserId = userId || currentUser?._id;
   const isOwnProfile = currentUser?._id === effectiveUserId;
   const [SelectedFeed, setSelectedFeed] = useState("Article");
@@ -31,7 +31,8 @@ function Profile({ currentUser }) {
       setArticles(filteredPosts);
     };
     fetchArticles();
-  }, []);
+  }, [currentUser]);
+
   useEffect(() => {
     if (!currentUser) return;
 
@@ -62,9 +63,11 @@ function Profile({ currentUser }) {
       setCredentials({
         name: profileUser.name || "",
         bio: profileUser.bio || "",
+        department: profileUser.department || "",
+        year: profileUser.year || "",
       });
     }
-  }, [profileUser]);
+  }, [profileUser,currentUser]);
 
   const onChange = (e) => {
     setCredentials({ ...Credentials, [e.target.name]: e.target.value });
@@ -128,7 +131,9 @@ function Profile({ currentUser }) {
 
               <div className="profile-info">
                 <div className="profile-top">
-                  <h1 className="profile-name">{profileUser.name}</h1>
+                  <h1 className="profile-name">{"Name: "+ profileUser.name}</h1>
+                  <h1 className="profile-name">{"Year: "+ profileUser.year}</h1>
+                  <h1 className="profile-name">{"Department: "+ profileUser.department}</h1>
                 </div>
                 <p className="profile-bio">{profileUser.bio || "No bio yet"}</p>
 
@@ -198,13 +203,13 @@ function Profile({ currentUser }) {
                   ></button>
                 </div>
 
-                <div className="modal-body">
+                <div className="modal-body-profile">
                   <input
                     type="text"
                     name="name"
                     value={Credentials.name}
                     onChange={onChange}
-                    className="form-control mb-3"
+                    className="form-control"
                     placeholder="Name"
                   />
 
@@ -215,6 +220,24 @@ function Profile({ currentUser }) {
                     onChange={onChange}
                     className="form-control"
                     placeholder="Bio"
+                  />
+
+                  <input
+                    type="text"
+                    name="department"
+                    value={Credentials.department}
+                    onChange={onChange}
+                    className="form-control"
+                    placeholder="Department"
+                  />
+
+                  <input
+                    type="text"
+                    name="year"
+                    value={Credentials.year}
+                    onChange={onChange}
+                    className="form-control"
+                    placeholder="Year"
                   />
                 </div>
 

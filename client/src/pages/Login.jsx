@@ -5,7 +5,7 @@ import { Navigate, Link, useNavigate } from "react-router-dom";
 import "../main.css";
 function Login({ setUser }) {
   const [loading, setLoading] = useState(false);
-  const [Credentials, setCredentials] = useState({email:"",password:""});
+  const [Credentials, setCredentials] = useState({email:"",password:"",departement:"",year:""});
     const [showpass,updateShowPass] = useState(false)
 
   const onChange = (e) => {
@@ -40,17 +40,9 @@ function Login({ setUser }) {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await fetch(`${host}api/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-        
-        },
-      body: JSON.stringify( {email:Credentials.email,password: Credentials.password} )
-    });
-    const state = await response.json()
-    if(state.success){
-        localStorage.setItem('token',state.authToken)
+    const response = await api.post(`${host}api/auth/login`, Credentials);
+    if(response.success){
+        localStorage.setItem('token',response.authToken)
         props.showAlert("Login Successfull","success")
         history('/')
     }

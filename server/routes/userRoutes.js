@@ -8,12 +8,14 @@ router.get("/me", protect, async (req, res) => {
 });
 
 router.put("/update", protect, async (req, res) => {
-  const { bio,name } = req.body;
+  const { bio,name ,department,year} = req.body;
   const user = await User.findById(req.user._id);
 
   if (user) {
     user.bio = bio || user.bio;
     user.name = name || user.name;
+    user.department = department || user.department;
+    user.year = year || user.year;
     await user.save();
     res.json(user);
   } else {

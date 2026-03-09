@@ -75,14 +75,6 @@ body {
   transform: scale(1.02);
 }
 
-
-.profile-top {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
 .profile-name {
   font-size: 32px;
   font-weight: 600;

@@ -10,7 +10,6 @@ function ArticlesPage({ user }) {
   const [selectedArticle, setselectedArticle] = useState(null);
   const [Caption, setcaption] = useState("");
 
-
   useEffect(() => {
     const fetchArticle = async () => {
       const res = await api.get("/api/posts/article");
