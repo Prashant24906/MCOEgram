@@ -3,22 +3,16 @@ import { useState } from "react";
 import api from "../api/axios";
 import { Navigate, Link, useNavigate } from "react-router-dom";
 import "../main.css";
+import UpdateProfile from './UpdateProfile'
 function Login({ setUser }) {
   const [loading, setLoading] = useState(false);
-  const [Credentials, setCredentials] = useState({email:"",password:"",departement:"",year:""});
+  const [Credentials, setCredentials] = useState({email:"",password:""});
+  const [Info, setInfo] = useState({name:"",bio:"",departement:"",year:""});
     const [showpass,updateShowPass] = useState(false)
 
   const onChange = (e) => {
-    setCredentials({...Credentials , [e.target.name] : e.target.value});
+    setInfo({...Info , [e.target.name] : e.target.value});
   };
-
-  const PasswordVisibility=()=>{
-    if(showpass===false){
-        updateShowPass(true)
-    }
-    else updateShowPass(false);
-  }
-
 
   let history = useNavigate();
   const handleSuccess = async (credentialResponse) => {
@@ -28,10 +22,16 @@ function Login({ setUser }) {
       const res = await api.post("/api/auth/google", {
         token: credentialResponse.credential,
       });
-
-      localStorage.setItem("token", res.data.token);
-      setUser(res.data.user);
-      history("/ArticlesPage");
+      const user = res.data.user;
+      setUser(user);
+      if(!user.department||!user.year){
+        localStorage.setItem("token", res.data.token);
+        history("/UpdateProfile");
+      }
+      else{
+        localStorage.setItem("token", res.data.token);
+        history("/ArticlesPage");
+      }
     } catch (error) {
       alert(error.response?.data?.message|| "Login failed" );
     } finally {

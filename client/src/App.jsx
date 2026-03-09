@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
 import Profile from "./pages/Profile";
 import ChatsPage from "./pages/ChatPage";
+import UpdateProfile from './pages/UpdateProfile'
 import PostsPage from "./pages/PostsPage";
 import Posts from "./pages/Posts";
 import ArticlesPage from "./pages/ArticlesPage";
@@ -62,6 +63,7 @@ function App() {
           path="/ArticlesPage"
           element={user ? <ArticlesPage user={user} /> : <Login setUser={setUser} />}
         />
+          <Route path="/UpdateProfile" element={<UpdateProfile/>} />
         <Route
           exact
           path="/"
