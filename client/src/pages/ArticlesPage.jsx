@@ -125,7 +125,7 @@ function ArticlesPage({ user }) {
                 </div>
                 <div className="post-caption">
                   <p className="caption-text">
-                    <strong>{article.user.name}</strong> {article.caption}
+                    <strong>{article.user.name}:</strong> {article.caption}
                   </p>
                 </div>
 
