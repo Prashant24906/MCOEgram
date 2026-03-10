@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
   year: {
     type: String,
     enum: ["1st","2nd","3rd","4th"],
-    default: "",
+    default: "1st",
   },
 }, { timestamps: true });
 module.exports = mongoose.models.User || mongoose.model("User", userSchema);
