@@ -10,6 +10,8 @@ function Articles({ user }) {
   const [selectedArticle, setselectedArticle] = useState(null);
   const [profileUser, setProfileUser] = useState(null);
   const [Caption, setcaption] = useState("");
+  const [loading, setLoading] = useState(true);
+
   const effectiveUserId = userId || user?._id;
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -22,6 +24,7 @@ function Articles({ user }) {
         (article) => article.user && article.user._id === effectiveUserId,
       );
       setArticles(filteredPosts);
+      setLoading(false);
     };
     fetchProfileData();
   }, []);
@@ -64,93 +67,108 @@ function Articles({ user }) {
   return (
     <>
       <div className="Article-container">
-              <div className="article-section">
-        <h2 className="posts-title">Articles</h2>
-        {articles.length>0?
-        (articles.map((article) => {
-          const isLiked = article.likes?.includes(user._id);
-          
-          return (
-            <article key={article._id} className="article-card-profile">
-              <div className="post-header-profile">
-                <div className="user-info">
-                  <img
-                    src={article.user.profilePic}
-                    alt={article.user.name}
-                    className="user-avatar"
-                  />
-                  <div className="user-details">
-                    <Link
-                      to={`/profile/${article.user._id}`}
-                      className="username"
-                    >
-                      {article.user.name}
-                    </Link>
-                  </div>
-                </div>
+        <div className="article-section">
+          <h2 className="posts-title">Articles</h2>
+          {!loading ? (
+            articles.length > 0 ?
+             (
+              articles.map((article) => {
+                const isLiked = article.likes?.includes(user._id);
 
-                {article.user._id === user._id && (
-                  <div className="dropdown">
-                    <button className="menu-button" data-bs-toggle="dropdown">
-                      <MoreHorizontal size={20} />
-                    </button>
-                    <ul className="dropdown-menu">
-                      <li
-                        type="button"
-                        className="dropdown-item Delete-Button"
-                        onClick={async () => {
-                          await api.delete(
-                            `/api/posts/article/delete/${article._id}`,
-                          );
-                          setArticles((prev) =>
-                            prev.filter((p) => p._id !== article._id),
-                          );
-                        }}
-                        >
-                        Delete
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-              <div className="post-caption-profile">
-                <p className="caption-text">
-                  <strong>{article.user.name}</strong> {article.caption}
-                </p>
-              </div>
+                return (
+                  <article key={article._id} className="article-card-profile">
+                    <div className="post-header-profile">
+                      <div className="user-info">
+                        <img
+                          src={article.user.profilePic}
+                          alt={article.user.name}
+                          className="user-avatar"
+                        />
+                        <div className="user-details">
+                          <Link
+                            to={`/profile/${article.user._id}`}
+                            className="username"
+                          >
+                            {article.user.name}
+                          </Link>
+                        </div>
+                      </div>
 
-              <div className="post-actions">
-                <button
-                  className={`action-button like-button ${
-                    isLiked ? "liked" : ""
-                  }`}
-                  onClick={() => toggleArticleLike(article._id)}
-                >
-                  <Heart size={20} className={isLiked ? "heart-filled" : ""} />
-                  <span className="action-text">
-                    {article.likes?.length || 0}
-                  </span>
-                </button>
+                      {article.user._id === user._id && (
+                        <div className="dropdown">
+                          <button
+                            className="menu-button"
+                            data-bs-toggle="dropdown"
+                          >
+                            <MoreHorizontal size={20} />
+                          </button>
+                          <ul className="dropdown-menu">
+                            <li
+                              type="button"
+                              className="dropdown-item Delete-Button"
+                              onClick={async () => {
+                                await api.delete(
+                                  `/api/posts/article/delete/${article._id}`,
+                                );
+                                setArticles((prev) =>
+                                  prev.filter((p) => p._id !== article._id),
+                                );
+                              }}
+                            >
+                              Delete
+                            </li>
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                    <div className="post-caption-profile">
+                      <p className="caption-text">
+                        <strong>{article.user.name}</strong> {article.caption}
+                      </p>
+                    </div>
 
-                <button
-                  className="action-button comment-button"
-                  data-bs-toggle="modal"
-                  data-bs-target="#commentModal"
-                  onClick={() => setselectedArticle(article)}
-                >
-                  <MessageCircle size={20} />
-                  <span className="action-text">
-                    {article.comments?.length || 0}
-                  </span>
-                </button>
+                    <div className="post-actions">
+                      <button
+                        className={`action-button like-button ${
+                          isLiked ? "liked" : ""
+                        }`}
+                        onClick={() => toggleArticleLike(article._id)}
+                      >
+                        <Heart
+                          size={20}
+                          className={isLiked ? "heart-filled" : ""}
+                        />
+                        <span className="action-text">
+                          {article.likes?.length || 0}
+                        </span>
+                      </button>
+
+                      <button
+                        className="action-button comment-button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#commentModal"
+                        onClick={() => setselectedArticle(article)}
+                      >
+                        <MessageCircle size={20} />
+                        <span className="action-text">
+                          {article.comments?.length || 0}
+                        </span>
+                      </button>
+                    </div>
+                  </article>
+                );
+              })
+            ) : (
+              <div className="empty-state-articles">
+                <p>No Articles yet</p>
               </div>
-            </article>
-          );
-        })):(<div className="empty-state-articles">
-            <p>No Articles yet</p>
-          </div>)
-      }
-      </div>
+            )
+          ) : (
+            <div className="empty-state-articles">
+              <p>Fetching articles...</p>
+            </div>
+          )}
+        </div>
 
         <div className="modal fade" id="commentModal">
           <div className="modal-dialog">

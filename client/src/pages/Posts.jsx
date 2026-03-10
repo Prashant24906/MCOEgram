@@ -13,21 +13,34 @@ function Posts({ currentUser }) {
   const [posts, setPosts] = useState([]);
   const [Credentials, setCredentials] = useState({ name: "", bio: "" });
   const effectiveUserId = userId || currentUser?._id;
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProfileData = async () => {
-      const [userRes, postRes] = await Promise.all([
-        api.get(`/api/users/${effectiveUserId}`),
-        api.get(`/api/posts`),
-      ]);
-      setProfileUser(userRes.data);
-      const filteredPosts = postRes.data.filter(
-        (post) => post.user && post.user._id === effectiveUserId,
-      );
-      setPosts(filteredPosts);
+      try {
+        setLoading(true);
+
+        const [userRes, postRes] = await Promise.all([
+          api.get(`/api/users/${effectiveUserId}`),
+          api.get(`/api/posts`),
+        ]);
+
+        setProfileUser(userRes.data);
+
+        const filteredPosts = postRes.data.filter(
+          (post) => post.user && post.user._id === effectiveUserId,
+        );
+
+        setPosts(filteredPosts);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchProfileData();
-  }, []);
+
+    if (effectiveUserId) fetchProfileData();
+  }, [effectiveUserId]);
 
   useEffect(() => {
     if (profileUser) {
@@ -86,94 +99,102 @@ function Posts({ currentUser }) {
       <div className="posts-section">
         <h2 className="posts-title">Posts</h2>
 
-        {posts.length > 0 ? (
-          <div className="profile-posts-grid">
-            {posts.map((post) => {
-              const isLiked = post.likes.includes(currentUser._id);
-              return (
-                <article key={post._id} className="profile-post-card">
-                  <div className="post-header">
-                    <div className="user-info">
-                      <img
-                        src={post.user.profilePic}
-                        alt={post.user.name}
-                        className="user-avatar"
-                      />
-                      <div className="user-details">
-                        <Link
-                          to={`/profile/${post.user._id}`}
-                          className="username"
-                        >
-                          {post.user.name}
-                        </Link>
+        {!loading ? (
+          posts.length > 0 ? (
+            <div className="profile-posts-grid">
+              {posts.map((post) => {
+                const isLiked = post.likes.includes(currentUser._id);
+                return (
+                  <article key={post._id} className="profile-post-card">
+                    <div className="post-header">
+                      <div className="user-info">
+                        <img
+                          src={post.user.profilePic}
+                          alt={post.user.name}
+                          className="user-avatar"
+                        />
+                        <div className="user-details">
+                          <Link
+                            to={`/profile/${post.user._id}`}
+                            className="username"
+                          >
+                            {post.user.name}
+                          </Link>
+                        </div>
                       </div>
+
+                      {post.user._id === currentUser._id && (
+                        <div className="dropdown">
+                          <button
+                            className="menu-button"
+                            data-bs-toggle="dropdown"
+                          >
+                            <MoreHorizontal size={20} />
+                          </button>
+                          <ul className="dropdown-menu">
+                            <li
+                              className="dropdown-item"
+                              onClick={async () => {
+                                await api.delete(
+                                  `/api/posts/delete/${post._id}`,
+                                );
+                                setPosts((prev) =>
+                                  prev.filter((p) => p._id !== post._id),
+                                );
+                              }}
+                            >
+                              Delete
+                            </li>
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                    <img src={post.imageUrl} className="post-image" />
+
+                    <div className="post-caption">
+                      <p className="caption-text">
+                        <strong>{post.user.name}</strong> {post.caption}
+                      </p>
                     </div>
 
-                    {post.user._id === currentUser._id && (
-                      <div className="dropdown">
-                        <button
-                          className="menu-button"
-                          data-bs-toggle="dropdown"
-                        >
-                          <MoreHorizontal size={20} />
-                        </button>
-                        <ul className="dropdown-menu">
-                          <li
-                            className="dropdown-item"
-                            onClick={async () => {
-                              await api.delete(`/api/posts/delete/${post._id}`);
-                              setPosts((prev) =>
-                                prev.filter((p) => p._id !== post._id),
-                              );
-                            }}
-                          >
-                            Delete
-                          </li>
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                  <img src={post.imageUrl} className="post-image" />
+                    <div className="post-actions">
+                      <button
+                        className={`action-button like-button ${
+                          isLiked ? "liked" : ""
+                        }`}
+                        onClick={() => toggleLike(post._id)}
+                      >
+                        <Heart
+                          size={20}
+                          className={isLiked ? "heart-filled" : ""}
+                        />
+                        <span className="action-text">{post.likes.length}</span>
+                      </button>
 
-                  <div className="post-caption">
-                    <p className="caption-text">
-                      <strong>{post.user.name}</strong> {post.caption}
-                    </p>
-                  </div>
-
-                  <div className="post-actions">
-                    <button
-                      className={`action-button like-button ${
-                        isLiked ? "liked" : ""
-                      }`}
-                      onClick={() => toggleLike(post._id)}
-                    >
-                      <Heart
-                        size={20}
-                        className={isLiked ? "heart-filled" : ""}
-                      />
-                      <span className="action-text">{post.likes.length}</span>
-                    </button>
-
-                    <button
-                      className="action-button comment-button"
-                      data-bs-toggle="modal"
-                      data-bs-target="#commentModal"
-                      onClick={() => setSelectedPost(post)}
-                    >
-                      <MessageCircle size={20} />
-                      <span className="action-text">
-                        {post.comments.length}
-                      </span>
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                      <button
+                        className="action-button comment-button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#commentModal"
+                        onClick={() => setSelectedPost(post)}
+                      >
+                        <MessageCircle size={20} />
+                        <span className="action-text">
+                          {post.comments.length}
+                        </span>
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <p>No posts yet</p>
+            </div>
+          )
         ) : (
           <div className="empty-state">
-            <p>No posts yet</p>
+            <p>Fetching Post...</p>
           </div>
         )}
       </div>
@@ -235,7 +256,7 @@ function Posts({ currentUser }) {
           </div>
         </div>
       </div>
-      
+
       <div className="modal fade" id="EditProfile">
         <div className="modal-dialog">
           <div className="modal-content">
