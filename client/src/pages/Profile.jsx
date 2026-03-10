@@ -6,17 +6,38 @@ import { Heart, MessageCircle, MoreHorizontal } from "lucide-react";
 import Posts from "./Posts";
 import Articles from "./Articles";
 import Navbar from "../components/Navbar";
+import TextField from "@mui/material/TextField";
+import Autocomplete from "@mui/material/Autocomplete";
+
 function Profile({ currentUser }) {
   const { userId } = useParams();
   const navigate = useNavigate();
   const [selectedPost, setSelectedPost] = useState(null);
   const [profileUser, setProfileUser] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [Credentials, setCredentials] = useState({ name: "", bio: "" ,year:"",department:""});
+  const [Credentials, setCredentials] = useState({
+    name: "",
+    bio: "",
+    year: "",
+    department: "",
+  });
   const effectiveUserId = userId || currentUser?._id;
   const isOwnProfile = currentUser?._id === effectiveUserId;
   const [SelectedFeed, setSelectedFeed] = useState("Article");
   const [articles, setArticles] = useState([]);
+
+  const Department = [
+    { label: "CS" },
+    { label: "IT" },
+    { label: "ENTC" },
+    { label: "AIML" },
+  ];
+  const Year = [
+    { label: "1st" },
+    { label: "2nd" },
+    { label: "3rd" },
+    { label: "4th" },
+  ];
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -67,7 +88,7 @@ function Profile({ currentUser }) {
         year: profileUser.year || "",
       });
     }
-  }, [profileUser,currentUser]);
+  }, [profileUser, currentUser]);
 
   const onChange = (e) => {
     setCredentials({ ...Credentials, [e.target.name]: e.target.value });
@@ -131,9 +152,15 @@ function Profile({ currentUser }) {
 
               <div className="profile-info">
                 <div className="profile-top">
-                  <h1 className="profile-name">{"Name: "+ profileUser.name}</h1>
-                  <h1 className="profile-name">{"Year: "+ profileUser.year}</h1>
-                  <h1 className="profile-name">{"Department: "+ profileUser.department}</h1>
+                  <h1 className="profile-name">
+                    {"Name: " + profileUser.name}
+                  </h1>
+                  <h1 className="profile-name">
+                    {"Year: " + profileUser.year}
+                  </h1>
+                  <h1 className="profile-name">
+                    {"Department: " + profileUser.department}
+                  </h1>
                 </div>
                 <p className="profile-bio">{profileUser.bio || "No bio yet"}</p>
 
@@ -222,22 +249,30 @@ function Profile({ currentUser }) {
                     placeholder="Bio"
                   />
 
-                  <input
-                    type="text"
-                    name="department"
-                    value={Credentials.department}
-                    onChange={onChange}
-                    className="form-control"
-                    placeholder="Department"
+                  <Autocomplete
+                    options={Year}
+                    sx={{ width: 300 }}
+                    value={Year.find((y) => y.label === Credentials.year) || null}
+                    onChange={(event, value) =>
+                      setCredentials({ ...Credentials, year: value?.label || "" })
+                    }
+                    renderInput={(params) => (
+                      <TextField {...params} label="Year" />
+                    )}
                   />
-
-                  <input
-                    type="text"
-                    name="year"
-                    value={Credentials.year}
-                    onChange={onChange}
-                    className="form-control"
-                    placeholder="Year"
+                  <Autocomplete
+                    options={Department}
+                    sx={{ width: 300 }}
+                    value={
+                      Department.find((d) => d.label === Credentials.department) ||
+                      null
+                    }
+                    onChange={(event, value) =>
+                      setCredentials({ ...Credentials, department: value?.label || "" })
+                    }
+                    renderInput={(params) => (
+                      <TextField {...params} label="Department" />
+                    )}
                   />
                 </div>
 

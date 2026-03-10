@@ -8,13 +8,15 @@ import "../main.css";
 import "../style/ChatPage.css";
 import Navbar from "../components/Navbar";
 function ChatsPage({ user }) {
-  const location = useLocation();
   const [chats, setChats] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUsers, setShowUsers] = useState(false);
   const [users, setUsers] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleReceive = (data) => {
@@ -75,6 +77,7 @@ function ChatsPage({ user }) {
   const fetchUsers = async () => {
     const res = await api.get("/api/users");
     setUsers(res.data);
+    setLoading(false);
   };
 
   socket.on("receive_message", (data) => {
@@ -127,106 +130,114 @@ function ChatsPage({ user }) {
           unreadCount: 0,
         })),
       );
+      setLoading(false);
     };
 
     fetchChats();
   }, []);
   return (
     <>
-    {user&&<Navbar />}
-    <div className="chat-layout">
-      <div className="chat-sidebar">
-        <h3 className="Chats">Chats</h3>
-        <button
-          className="NewChat"
-          onClick={() => {
-            showUsers?
-            setShowUsers(false):setShowUsers(true);
-          }}
-        >
-          + New Chat
-        </button>
-        {showUsers && (
-          <div className="user-select-list">
-            {users.length === 0 && <p>No users found</p>}
-
-            {users
-              .filter((u) => u._id !== user._id)
-              .map((user) => (
-                <div
-                  key={user._id}
-                  className="user-select-item"
-                  onClick={() => {
-                    setSelectedUser(user);
-                    setShowUsers(false);
-                  }}
-                >
-                  <strong>
-                    {user.name}
-
-                    {chats.unreadCount > 0 && (
-                      <span
-                        style={{
-                          backgroundColor: "#25D366",
-                          color: "white",
-                          borderRadius: "12px",
-                          padding: "2px 6px",
-                          fontSize: "12px",
-                          marginLeft: "6px",
+      {user && <Navbar />}
+      <div className="chat-layout">
+        <div className="chat-sidebar">
+          <h3 className="Chats">Chats</h3>
+          <button
+            className="NewChat"
+            onClick={() => {
+              showUsers ? setShowUsers(false) : setShowUsers(true);
+            }}
+          >
+            + New Chat
+          </button>
+          {showUsers && (
+            <div className="user-select-list">
+              {!loading ? (
+                users.length > 0 ? (
+                  users
+                    .filter((u) => u._id !== user._id)
+                    .map((user) => (
+                      <div
+                        key={user._id}
+                        className="user-select-item"
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setShowUsers(false);
                         }}
                       >
-                        {chat.unreadCount}
-                      </span>
-                    )}
-                  </strong>
-                </div>
-              ))}
-          </div>
-        )}
-        {chats.map((chat) => {
-          const otherUser = chat.participants.find(
-            (p) => p._id.toString() !== user._id.toString(),
-          );
-          if (!otherUser) return null;
+                        <strong>
+                          {user.name}
 
-          return (
-            <div
-              key={chat._id}
-              className = "chats-list"
-              onClick={() => setSelectedUser(otherUser)}
-            >
-              <strong>
-                <span
-                className = "user-list"
-                  onClick={() => navigate(`/profile/${otherUser._id}`)}
-                >
-                  {otherUser.name}
-                </span>
-
-                {onlineUsers.some((id) => id === otherUser._id.toString()) && (
-                  <span style={{ color: "green", marginLeft: "6px" }}>●</span>
-                )}
-              </strong>
-
-              <p style={{ fontSize: "12px", color: "gray" }}>
-                {(chat.lastMessage?.text).slice(0, 15) || "No messages yet"}
-              </p>
+                          {chats.unreadCount > 0 && (
+                            <span
+                              style={{
+                                backgroundColor: "#25D366",
+                                color: "white",
+                                borderRadius: "12px",
+                                padding: "2px 6px",
+                                fontSize: "12px",
+                                marginLeft: "6px",
+                              }}
+                            >
+                              {chat.unreadCount}
+                            </span>
+                          )}
+                        </strong>
+                      </div>
+                    ))
+                ) : (
+                  <p>Fetching users......</p>
+                )
+              ) : (
+                <p>No users found</p>
+              )}
             </div>
-          );
-        })}
-      </div>
+          )}
+          {chats.map((chat) => {
+            const otherUser = chat.participants.find(
+              (p) => p._id.toString() !== user._id.toString(),
+            );
+            if (!otherUser) return null;
 
-      <div style={{ flex: 1 }}>
-        {selectedUser && (
-          <Chat
-            currentUser={user}
-            selectedUserName={selectedUser.name}
-            selectedUserID={selectedUser._id}
-            receiverId={selectedUser._id}
-          />
-        )}
+            return (
+              <div
+                key={chat._id}
+                className="chats-list"
+                onClick={() => setSelectedUser(otherUser)}
+              >
+                <strong>
+                  <span
+                    className="user-list"
+                    onClick={() => navigate(`/profile/${otherUser._id}`)}
+                  >
+                    {otherUser.name}
+                  </span>
+
+                  {onlineUsers.some(
+                    (id) => id === otherUser._id.toString(),
+                  ) && (
+                    <span style={{ color: "green", marginLeft: "6px" }}>●</span>
+                  )}
+                </strong>
+
+                <p style={{ fontSize: "12px", color: "gray" }}>
+                  {(chat.lastMessage?.text).slice(0, 15) || "No messages yet"}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{ flex: 1 }}>
+          {selectedUser && (
+            <Chat
+              currentUser={user}
+              selectedUserName={selectedUser.name}
+              selectedUserID={selectedUser._id}
+              receiverId={selectedUser._id}
+            />
+          )}
+        </div>
       </div>
-    </div>
     </>
   );
 }
