@@ -245,6 +245,7 @@ function Profile({ currentUser }) {
                     name="bio"
                     value={Credentials.bio}
                     onChange={onChange}
+                    required
                     className="form-control"
                     placeholder="Bio"
                   />

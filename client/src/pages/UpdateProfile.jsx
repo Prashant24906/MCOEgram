@@ -59,7 +59,7 @@ export default function UpdateProfile() {
               />
               <TextField
                 id="outlined-basic"
-                label="Bio"
+                label="Bio for your profile"
                 variant="outlined"
                 type="text"
                 name="bio"
