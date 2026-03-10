@@ -75,7 +75,7 @@ function ArticlesPage({ user }) {
           Add Article
         </button>
         <div className="Article-container">
-          {loading?(<div>Fetching Articles</div>
+          {loading?(<div  style = {{color: "white"}}>Fetching Articles</div>
         ):
           (articles.map((article) => {
             const isLiked = article.likes?.includes(user._id);

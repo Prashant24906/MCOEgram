@@ -117,7 +117,7 @@ function PostsPage({ user }) {
           </button>
           <div className="posts-container">
             {loading ? (
-              <div>Fetching Posts</div>
+              <div style = {{color: "white"}}>Fetching Posts</div>
             ) : (
               posts.map((post) => {
                 const isLiked = post.likes?.includes(user._id);
