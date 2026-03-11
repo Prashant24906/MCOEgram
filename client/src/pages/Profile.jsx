@@ -29,6 +29,7 @@ function Profile({ currentUser }) {
   const Department = [
     { label: "CS" },
     { label: "IT" },
+    { label: "MECH" },
     { label: "ENTC" },
     { label: "AIML" },
   ];
