@@ -61,7 +61,7 @@ function App() {
         <Route
           exact
           path="/ArticlesPage"
-          element={user ? <ArticlesPage user={user} /> : <Login setUser={setUser} />}
+          element={(user) ? (<ArticlesPage user={user} />) : <Login setUser={setUser} />}
         />
           <Route path="/UpdateProfile" element={<UpdateProfile/>} />
         <Route

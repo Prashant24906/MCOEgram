@@ -4,8 +4,9 @@ import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
+import ArticlesPage from "./ArticlesPage";
 
-export default function UpdateProfile() {
+export default function UpdateProfile({user}) {
   const Department = [
     { label: "CS" },
     { label: "IT" },
@@ -31,16 +32,17 @@ export default function UpdateProfile() {
   };
   const handleSubmit = async (e) => {
     try {
-      console.log(Info);
       const response = await api.put("/api/users/update", Info);
-      history("/ArticlesPage");
+       history("/")
+      console.log(Info)
     } catch (error) {
       alert(error);
     }
   };
   return (
     <>
-       <div className="Login-container">
+
+      <div className="Login-container">
 
       <div className="login">
         <h1>Login to MCOEGRAM</h1>
@@ -56,7 +58,7 @@ export default function UpdateProfile() {
                 name="name"
                 value={Info.name}
                 onChange={onChange}
-              />
+                />
               <TextField
                 id="outlined-basic"
                 label="Bio for your profile"
@@ -65,7 +67,7 @@ export default function UpdateProfile() {
                 name="bio"
                 value={Info.bio}
                 onChange={onChange}
-              />
+                />
               <Autocomplete
                 options={Year}
                 sx={{ width: 300 }}
@@ -74,7 +76,7 @@ export default function UpdateProfile() {
                   setInfo({ ...Info, year: value?.label || "" })
                 }
                 renderInput={(params) => <TextField {...params} label="Year" />}
-              />
+                />
               <Autocomplete
                 options={Department}
                 sx={{ width: 300 }}
@@ -87,16 +89,15 @@ export default function UpdateProfile() {
                 renderInput={(params) => (
                   <TextField {...params} label="Department" />
                 )}
-              />
+                />
               <button
                 className="btn btn-primary "
                 onClick={() => {
-                  console.log(Info);
                   Info.department && Info.name && Info.year && Info.bio
-                    ? handleSubmit()
-                    : alert("Please fill all the Details");
+                  ? handleSubmit()
+                  : alert("Please fill all the Details");
                 }}
-              >
+                >
                 Submit
               </button>
           </div>

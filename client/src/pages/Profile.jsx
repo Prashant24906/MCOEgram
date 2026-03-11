@@ -8,7 +8,7 @@ import Articles from "./Articles";
 import Navbar from "../components/Navbar";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
-
+import UpdateProfile from "./UpdateProfile";
 function Profile({ currentUser }) {
   const { userId } = useParams();
   const navigate = useNavigate();
@@ -138,6 +138,8 @@ function Profile({ currentUser }) {
   return (
     <>
       {currentUser && <Navbar />}
+      {console.log(currentUser)}
+      {currentUser.department?
       <div className="ProfileBody">
         <div className="profile-container">
           <div className="profile-header">
@@ -147,7 +149,7 @@ function Profile({ currentUser }) {
                   src={profileUser.profilePic}
                   alt={profileUser.name}
                   className="profile-pic"
-                />
+                  />
               </div>
 
               <div className="profile-info">
@@ -166,16 +168,16 @@ function Profile({ currentUser }) {
 
                 {isOwnProfile ? (
                   <button
-                    className=" edit-profile-button"
-                    data-bs-toggle="modal"
-                    data-bs-target="#EditProfile"
+                  className=" edit-profile-button"
+                  data-bs-toggle="modal"
+                  data-bs-target="#EditProfile"
                   >
                     Edit Profile
                   </button>
                 ) : (
                   <button
-                    className="edit-profile-button"
-                    onClick={navigateToChat}
+                  className="edit-profile-button"
+                  onClick={navigateToChat}
                   >
                     Message
                   </button>
@@ -198,13 +200,13 @@ function Profile({ currentUser }) {
             <button
               className="feed-type-inside"
               onClick={() => setSelectedFeed("Articles")}
-            >
+              >
               Articles
             </button>
             <button
               className="feed-type-inside"
               onClick={() => setSelectedFeed("Posts")}
-            >
+              >
               Posts
             </button>
           </div>
@@ -227,7 +229,7 @@ function Profile({ currentUser }) {
                     type="button"
                     className="btn-close"
                     data-bs-dismiss="modal"
-                  ></button>
+                    ></button>
                 </div>
 
                 <div className="modal-body-profile">
@@ -238,7 +240,7 @@ function Profile({ currentUser }) {
                     onChange={onChange}
                     className="form-control"
                     placeholder="Name"
-                  />
+                    />
 
                   <input
                     type="text"
@@ -248,7 +250,7 @@ function Profile({ currentUser }) {
                     required
                     className="form-control"
                     placeholder="Bio"
-                  />
+                    />
 
                   <Autocomplete
                     options={Year}
@@ -260,7 +262,7 @@ function Profile({ currentUser }) {
                     renderInput={(params) => (
                       <TextField {...params} label="Year" />
                     )}
-                  />
+                    />
                   <Autocomplete
                     options={Department}
                     sx={{ width: 300 }}
@@ -274,7 +276,7 @@ function Profile({ currentUser }) {
                     renderInput={(params) => (
                       <TextField {...params} label="Department" />
                     )}
-                  />
+                    />
                 </div>
 
                 <div className="modal-footer">
@@ -282,7 +284,7 @@ function Profile({ currentUser }) {
                     className="btn btn-primary"
                     onClick={EditProfile}
                     data-bs-dismiss="modal"
-                  >
+                    >
                     Update
                   </button>
                 </div>
@@ -290,7 +292,9 @@ function Profile({ currentUser }) {
             </div>
           </div>
         </div>
-      </div>
+      </div> :
+      <UpdateProfile user = {currentUser}/>
+  }
     </>
   );
 }

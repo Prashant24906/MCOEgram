@@ -4,7 +4,7 @@ import api from "../api/axios";
 import "../style/ProfilePage.css";
 import "../style/Posts.css";
 import { Heart, MessageCircle, MoreHorizontal } from "lucide-react";
-
+import UpdateProfile from "./UpdateProfile";
 function Posts({ currentUser }) {
   const { userId } = useParams();
   const navigate = useNavigate();
@@ -95,6 +95,8 @@ function Posts({ currentUser }) {
   };
 
   return (
+    <>
+    {console.log(currentUser.department)}
     <div className="profile-container">
       <div className="posts-section">
         <h2 className="posts-title">Posts</h2>
@@ -302,6 +304,7 @@ function Posts({ currentUser }) {
         </div>
       </div>
     </div>
+  </>
   );
 }
 

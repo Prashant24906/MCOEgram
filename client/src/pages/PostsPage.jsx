@@ -98,6 +98,7 @@ function PostsPage({ user }) {
   return (
     <>
       {user && <Navbar />}
+          {console.log(user.department)}
       <div className="feed-container">
         <div className="feed-wrapper">
           <div className="feed-header">
