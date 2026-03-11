@@ -10,6 +10,7 @@ export default function UpdateProfile({user}) {
   const Department = [
     { label: "CS" },
     { label: "IT" },
+    { label: "MECH" },
     { label: "ENTC" },
     { label: "AIML" },
   ];
