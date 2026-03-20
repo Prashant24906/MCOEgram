@@ -31,12 +31,9 @@ const STYLES = `
     --transition:      all 0.22s cubic-bezier(0.4,0,0.2,1);
   }
 
-  /*
-   * cp-root: fills the full viewport height.
-   * nb-page-offset (from Navbar.jsx) adds margin-left: 72px
-   * so content clears the fixed left sidebar.
-   * No calc() needed — there is no top bar anymore.
-   */
+  /* ─────────────────────────────────────────────
+     ROOT — full viewport, no top bar
+  ───────────────────────────────────────────── */
   .cp-root {
     box-sizing: border-box;
     font-family: 'DM Sans', sans-serif;
@@ -50,7 +47,9 @@ const STYLES = `
 
   .cp-root * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* ── Status bar — fixed height, never grows ── */
+  /* ─────────────────────────────────────────────
+     STATUS BAR
+  ───────────────────────────────────────────── */
   .cp-status-bar {
     padding: 6px 18px;
     background: var(--mcoe-navy-light);
@@ -64,18 +63,15 @@ const STYLES = `
   }
 
   .cp-status-bar .dot {
-    width: 6px;
-    height: 6px;
+    width: 6px; height: 6px;
     border-radius: 50%;
     background: var(--mcoe-online);
     flex-shrink: 0;
   }
 
-  /*
-   * cp-layout: takes all remaining height below the status bar.
-   * min-height: 0 is the critical flex fix —
-   * without it, flex children ignore overflow:hidden and cause white space.
-   */
+  /* ─────────────────────────────────────────────
+     DESKTOP LAYOUT — side by side
+  ───────────────────────────────────────────── */
   .cp-layout {
     display: flex;
     flex: 1;
@@ -118,8 +114,7 @@ const STYLES = `
     background: var(--mcoe-gold-dim);
     border: 1px solid var(--mcoe-gold);
     border-radius: 8px;
-    width: 28px;
-    height: 28px;
+    width: 28px; height: 28px;
     display: grid;
     place-items: center;
     font-size: 14px;
@@ -195,8 +190,7 @@ const STYLES = `
   .cp-user-pick-item:hover { background: var(--mcoe-gold-dim); }
 
   .cp-user-pick-item .avatar {
-    width: 30px;
-    height: 30px;
+    width: 30px; height: 30px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--mcoe-teal), var(--mcoe-gold));
     display: grid;
@@ -210,10 +204,10 @@ const STYLES = `
 
   .cp-user-pick-item .name { font-size: 13px; font-weight: 500; }
 
-  /* ── Chat list — scrollable, takes remaining sidebar height ── */
+  /* ── Chat list ── */
   .cp-chat-list {
     flex: 1;
-    min-height: 0;      /* lets it shrink correctly inside flex column */
+    min-height: 0;
     overflow-y: auto;
     padding: 8px 0;
   }
@@ -243,8 +237,7 @@ const STYLES = `
   }
 
   .cp-avatar {
-    width: 40px;
-    height: 40px;
+    width: 44px; height: 44px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--mcoe-teal) 0%, #1a8fd1 100%);
     display: grid;
@@ -259,10 +252,8 @@ const STYLES = `
 
   .cp-avatar .online-dot {
     position: absolute;
-    bottom: 1px;
-    right: 1px;
-    width: 10px;
-    height: 10px;
+    bottom: 1px; right: 1px;
+    width: 11px; height: 11px;
     border-radius: 50%;
     background: var(--mcoe-online);
     border: 2px solid var(--mcoe-navy-mid);
@@ -276,6 +267,9 @@ const STYLES = `
     font-weight: 600;
     color: var(--mcoe-text);
     cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .cp-chat-name:hover { color: var(--mcoe-gold); }
@@ -286,7 +280,7 @@ const STYLES = `
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-top: 2px;
+    margin-top: 3px;
   }
 
   .cp-unread-badge {
@@ -311,6 +305,7 @@ const STYLES = `
     background: var(--mcoe-navy);
   }
 
+  /* ── Empty state ── */
   .cp-empty-state {
     flex: 1;
     display: flex;
@@ -323,8 +318,7 @@ const STYLES = `
   }
 
   .cp-empty-icon {
-    width: 64px;
-    height: 64px;
+    width: 64px; height: 64px;
     border-radius: 50%;
     border: 2px dashed var(--mcoe-muted);
     display: grid;
@@ -332,12 +326,12 @@ const STYLES = `
     font-size: 26px;
   }
 
-  .cp-empty-state p   { font-family: 'Syne', sans-serif; font-size: 15px; color: var(--mcoe-muted); }
+  .cp-empty-state p    { font-family: 'Syne', sans-serif; font-size: 15px; color: var(--mcoe-muted); }
   .cp-empty-state span { font-size: 12px; color: var(--mcoe-muted); }
 
   /* ── Skeleton ── */
   .cp-skeleton {
-    padding: 8px 18px;
+    padding: 10px 18px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -349,22 +343,175 @@ const STYLES = `
     50%       { opacity: 0.8; }
   }
 
-  .cp-skel-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--mcoe-navy-light); flex-shrink: 0; }
+  .cp-skel-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--mcoe-navy-light); flex-shrink: 0; }
   .cp-skel-lines  { flex: 1; display: flex; flex-direction: column; gap: 6px; }
   .cp-skel-line   { height: 10px; border-radius: 6px; background: var(--mcoe-navy-light); }
 
   .cp-no-content {
-    padding: 12px 18px;
+    padding: 14px 18px;
     font-size: 12px;
     color: var(--mcoe-muted);
     font-style: italic;
   }
 
-  /* ── Mobile ── */
+  /* ─────────────────────────────────────────────
+     MOBILE — WhatsApp-style: one panel at a time
+     Slide the conversation list OUT when a chat
+     is open, slide it back on back press.
+  ───────────────────────────────────────────── */
   @media (max-width: 768px) {
-    .cp-root   { height: calc(100vh - 60px); } /* 60px = bottom nav bar height */
-    .cp-layout { flex-direction: column; }
-    .cp-sidebar { width: 100%; min-width: unset; max-height: 40vh; }
+
+    /* On mobile the sidebar nav is a BOTTOM bar (60px tall) */
+    .cp-root {
+      height: calc(100vh - 60px);
+      /* nb-page-offset adds margin-left on desktop — reset it on mobile */
+      margin-left: 0 !important;
+    }
+
+    /* Stack panels on top of each other via absolute positioning */
+    .cp-layout {
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── Conversation list panel ── */
+    .cp-sidebar {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      min-width: unset;
+      height: 100%;
+      border-right: none;
+      /* slide in/out on the X axis */
+      transform: translateX(0);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      z-index: 2;
+    }
+
+    /* When a chat is open, slide the list off to the left */
+    .cp-sidebar.chat-open {
+      transform: translateX(-100%);
+      pointer-events: none;
+    }
+
+    /* ── Active chat panel ── */
+    .cp-main {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      /* start off-screen to the right */
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      z-index: 1;
+    }
+
+    /* When a chat is open, slide the chat panel into view */
+    .cp-main.chat-open {
+      transform: translateX(0);
+    }
+
+    /* ── Mobile chat header: back button + name ── */
+    .cp-mobile-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--mcoe-navy-mid);
+      border-bottom: 1px solid var(--mcoe-border);
+      flex-shrink: 0;
+    }
+
+    .cp-back-btn {
+      background: none;
+      border: none;
+      color: var(--mcoe-gold);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+
+    .cp-back-btn:hover { background: var(--mcoe-gold-dim); }
+
+    .cp-mobile-user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .cp-mobile-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--mcoe-teal), #1a8fd1);
+      display: grid;
+      place-items: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .cp-mobile-avatar .online-dot {
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--mcoe-online);
+      border: 2px solid var(--mcoe-navy-mid);
+    }
+
+    .cp-mobile-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--mcoe-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+    }
+
+    .cp-mobile-name:hover { color: var(--mcoe-gold); }
+
+    .cp-mobile-status {
+      font-size: 11px;
+      color: var(--mcoe-online);
+      margin-top: 1px;
+    }
+
+    /* Sidebar header on mobile — bigger touch targets */
+    .cp-sidebar-header { padding: 16px 16px 12px; }
+    .cp-sidebar-title  { font-size: 20px; margin-bottom: 10px; }
+
+    .cp-new-chat-btn {
+      padding: 12px 14px;
+      font-size: 14px;
+      border-radius: 10px;
+    }
+
+    /* Bigger chat items on mobile for easier tapping */
+    .cp-chat-item { padding: 13px 16px; }
+
+    .cp-avatar { width: 48px; height: 48px; font-size: 17px; }
+
+    .cp-chat-name  { font-size: 14px; }
+    .cp-chat-preview { font-size: 12px; margin-top: 4px; }
+
+    /* Status bar smaller on mobile */
+    .cp-status-bar { padding: 5px 14px; font-size: 10px; }
+  }
+
+  /* Desktop: hide the mobile header */
+  @media (min-width: 769px) {
+    .cp-mobile-header { display: none !important; }
   }
 `;
 
@@ -385,15 +532,24 @@ function SkeletonRow() {
     <div className="cp-skeleton">
       <div className="cp-skel-avatar" />
       <div className="cp-skel-lines">
-        <div className="cp-skel-line" style={{ width: "55%" }} />
-        <div className="cp-skel-line" style={{ width: "80%" }} />
+        <div className="cp-skel-line" style={{ width: "50%" }} />
+        <div className="cp-skel-line" style={{ width: "75%" }} />
       </div>
     </div>
   );
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ── Back arrow SVG ────────────────────────────────────────────────────────────
+function BackArrow() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+  );
+}
 
+// ─── Component ────────────────────────────────────────────────────────────────
 function ChatsPage({ user }) {
   const [chats, setChats] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -484,6 +640,18 @@ function ChatsPage({ user }) {
 
   const isOnline = (id) => onlineUsers.includes(id);
 
+  // When a user is selected on mobile, slide to chat view
+  const openChat = (u) => {
+    setSelectedUser(u);
+    setShowUsers(false);
+  };
+
+  // Back button — return to conversation list on mobile
+  const closeChat = () => setSelectedUser(null);
+
+  // CSS class helpers for mobile slide animation
+  const chatOpen = !!selectedUser;
+
   return (
     <div className="cp-root nb-page-offset">
 
@@ -493,11 +661,12 @@ function ChatsPage({ user }) {
         {onlineUsers.length} online · MCOEgram Messenger
       </div>
 
-      {/* ── Body: conversations list + chat area ── */}
       <div className="cp-layout">
 
-        {/* Conversations list */}
-        <aside className="cp-sidebar">
+        {/* ════════════════════════════════════════
+            CONVERSATION LIST PANEL
+        ════════════════════════════════════════ */}
+        <aside className={`cp-sidebar${chatOpen ? " chat-open" : ""}`}>
           <div className="cp-sidebar-header">
             <div className="cp-sidebar-title">
               <span className="icon">💬</span>
@@ -511,6 +680,7 @@ function ChatsPage({ user }) {
             </button>
           </div>
 
+          {/* User picker */}
           {showUsers && (
             <div className="cp-user-picker">
               <p className="cp-user-picker-label">Start a conversation</p>
@@ -526,7 +696,7 @@ function ChatsPage({ user }) {
                       <div
                         key={u._id}
                         className="cp-user-pick-item"
-                        onClick={() => { setSelectedUser(u); setShowUsers(false); }}
+                        onClick={() => openChat(u)}
                       >
                         <div className="avatar">{getInitials(u.name)}</div>
                         <span className="name">{u.name}</span>
@@ -540,6 +710,7 @@ function ChatsPage({ user }) {
             </div>
           )}
 
+          {/* Chat list */}
           <div className="cp-chat-list">
             {chatsLoading ? (
               [0, 1, 2, 3].map((i) => <SkeletonRow key={i} />)
@@ -557,7 +728,7 @@ function ChatsPage({ user }) {
                   <div
                     key={chat._id}
                     className={`cp-chat-item${active ? " active" : ""}`}
-                    onClick={() => setSelectedUser(other)}
+                    onClick={() => openChat(other)}
                   >
                     <div className="cp-avatar">
                       {getInitials(other.name)}
@@ -565,19 +736,11 @@ function ChatsPage({ user }) {
                     </div>
 
                     <div className="cp-chat-info">
-                      <div
-                        className="cp-chat-name"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/profile/${other._id}`);
-                        }}
-                      >
-                        {other.name}
-                      </div>
+                      <div className="cp-chat-name">{other.name}</div>
                       <div className="cp-chat-preview">
                         {chat.lastMessage?.text
-                          ? chat.lastMessage.text.slice(0, 28) +
-                            (chat.lastMessage.text.length > 28 ? "…" : "")
+                          ? chat.lastMessage.text.slice(0, 30) +
+                            (chat.lastMessage.text.length > 30 ? "…" : "")
                           : "No messages yet"}
                       </div>
                     </div>
@@ -592,16 +755,46 @@ function ChatsPage({ user }) {
           </div>
         </aside>
 
-        {/* Active chat or empty state */}
-        <main className="cp-main">
+        {/* ════════════════════════════════════════
+            CHAT PANEL
+        ════════════════════════════════════════ */}
+        <main className={`cp-main${chatOpen ? " chat-open" : ""}`}>
+
           {selectedUser ? (
-            <Chat
-              currentUser={user}
-              selectedUserName={selectedUser.name}
-              selectedUserID={selectedUser._id}
-              receiverId={selectedUser._id}
-            />
+            <>
+              {/* Mobile header: back button + user info */}
+              <div className="cp-mobile-header">
+                <button className="cp-back-btn" onClick={closeChat} aria-label="Back">
+                  <BackArrow />
+                </button>
+                <div className="cp-mobile-user-info">
+                  <div className="cp-mobile-avatar">
+                    {getInitials(selectedUser.name)}
+                    {isOnline(selectedUser._id) && <span className="online-dot" />}
+                  </div>
+                  <div>
+                    <div
+                      className="cp-mobile-name"
+                      onClick={() => navigate(`/profile/${selectedUser._id}`)}
+                    >
+                      {selectedUser.name}
+                    </div>
+                    {isOnline(selectedUser._id) && (
+                      <div className="cp-mobile-status">● Active now</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <Chat
+                currentUser={user}
+                selectedUserName={selectedUser.name}
+                selectedUserID={selectedUser._id}
+                receiverId={selectedUser._id}
+              />
+            </>
           ) : (
+            /* Desktop empty state — hidden on mobile since list is shown instead */
             <div className="cp-empty-state">
               <div className="cp-empty-icon">💬</div>
               <p>Pick a conversation</p>
