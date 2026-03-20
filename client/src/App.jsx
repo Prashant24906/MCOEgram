@@ -56,7 +56,7 @@ function App() {
   return (
     <>
 
-      
+      {user && <Navbar />}
       <Routes>
         <Route
           exact
