@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Heart, MessageCircle, MoreHorizontal, BookOpen, Plus, X } from "lucide-react";
 import Navbar from "../components/Navbar";
 
-// ─── Shared design tokens (same as ChatsPage / PostsPage) ─────────────────────
+// ─── Shared design tokens (same as ChatsPage / MomentsPage) ─────────────────────
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
 
@@ -332,7 +332,7 @@ const STYLES = `
   .ap-modal-input::placeholder { color: var(--mcoe-muted); }
   .ap-modal-input:focus { border-color: var(--mcoe-gold); }
 
-  .ap-modal-post-btn {
+  .ap-modal-moment-btn {
     padding: 9px 22px;
     background: var(--mcoe-gold);
     color: var(--mcoe-navy);
@@ -345,7 +345,7 @@ const STYLES = `
     transition: var(--transition);
   }
 
-  .ap-modal-post-btn:hover { background: #ffd84d; box-shadow: var(--shadow-glow); }
+  .ap-modal-moment-btn:hover { background: #ffd84d; box-shadow: var(--shadow-glow); }
 
   /* ── Comment item ── */
   .ap-comment-item {
@@ -439,7 +439,7 @@ function ArticlesPage({ user }) {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const res = await api.get("/api/posts/article");
+        const res = await api.get("/api/moments/article");
         setArticles(res.data);
       } catch (err) {
         console.error("Failed to fetch articles:", err);
@@ -450,15 +450,15 @@ function ArticlesPage({ user }) {
     fetchArticles();
   }, []);
 
-  // ── Post new article ──
+  // ── Moment new article ──
   const postArticle = async () => {
     if (!caption.trim()) return;
     try {
-      const res = await api.post("/api/posts/article", { caption });
+      const res = await api.post("/api/moments/article", { caption });
       setArticles((prev) => [res.data, ...prev]);
       setCaption("");
     } catch (err) {
-      console.error("Failed to post article:", err);
+      console.error("Failed to moment article:", err);
     }
   };
 
@@ -477,7 +477,7 @@ function ArticlesPage({ user }) {
       })
     );
     try {
-      await api.put(`/api/posts/article/${articleId}/like`);
+      await api.put(`/api/moments/article/${articleId}/like`);
     } catch (err) {
       console.error("Like failed:", err);
     }
@@ -486,7 +486,7 @@ function ArticlesPage({ user }) {
   // ── Delete article ──
   const deleteArticle = async (articleId) => {
     try {
-      await api.delete(`/api/posts/article/delete/${articleId}`);
+      await api.delete(`/api/moments/article/delete/${articleId}`);
       setArticles((prev) => prev.filter((a) => a._id !== articleId));
     } catch (err) {
       console.error("Delete failed:", err);
@@ -497,7 +497,7 @@ function ArticlesPage({ user }) {
   const addComment = async (e, articleId) => {
     if (e.key !== "Enter" || !e.target.value.trim()) return;
     try {
-      const res = await api.post(`/api/posts/article/${articleId}/comment`, {
+      const res = await api.post(`/api/moments/article/${articleId}/comment`, {
         text: e.target.value,
       });
       const updater = (prev) =>
@@ -532,7 +532,7 @@ function ArticlesPage({ user }) {
     }));
     try {
       await api.delete(
-        `/api/posts/article/delete/${articleId}/comment/${commentId}`
+        `/api/moments/article/delete/${articleId}/comment/${commentId}`
       );
     } catch (err) {
       console.error("Comment delete failed:", err);
@@ -660,11 +660,11 @@ function ArticlesPage({ user }) {
             </div>
             <div className="modal-footer">
               <button
-                className="ap-modal-post-btn"
+                className="ap-modal-moment-btn"
                 onClick={postArticle}
                 data-bs-dismiss="modal"
               >
-                Post
+                Moment
               </button>
             </div>
           </div>
@@ -685,7 +685,7 @@ function ArticlesPage({ user }) {
                   <input
                     type="text"
                     className="ap-modal-input"
-                    placeholder="Add a comment… (Enter to post)"
+                    placeholder="Add a comment… (Enter to moment)"
                     style={{ marginBottom: 14 }}
                     onKeyDown={(e) => addComment(e, selectedArticle._id)}
                   />

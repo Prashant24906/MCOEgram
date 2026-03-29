@@ -71,7 +71,7 @@ const STYLES = `
     margin-top: 8px;
   }
 
-  /* ── Add post button ── */
+  /* ── Add moment button ── */
   .pp-add-btn {
     display: flex;
     align-items: center;
@@ -105,7 +105,7 @@ const STYLES = `
     gap: 24px;
   }
 
-  /* ── Post card ── */
+  /* ── Moment card ── */
   .pp-card {
     background: var(--mcoe-card);
     border: 1px solid var(--mcoe-border);
@@ -180,7 +180,7 @@ const STYLES = `
     color: var(--mcoe-text);
   }
 
-  /* ── Post image ── */
+  /* ── Moment image ── */
   .pp-image {
     width: 100%;
     display: block;
@@ -339,7 +339,7 @@ const STYLES = `
     margin-top: -4px;
   }
 
-  .pp-modal-post-btn {
+  .pp-modal-moment-btn {
     padding: 9px 22px;
     background: var(--mcoe-gold);
     color: var(--mcoe-navy);
@@ -352,8 +352,8 @@ const STYLES = `
     transition: var(--transition);
   }
 
-  .pp-modal-post-btn:hover { background: #ffd84d; box-shadow: var(--shadow-glow); }
-  .pp-modal-post-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .pp-modal-moment-btn:hover { background: #ffd84d; box-shadow: var(--shadow-glow); }
+  .pp-modal-moment-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
   /* ── Comment item ── */
   .pp-comment-item {
@@ -426,29 +426,29 @@ function SkeletonCard() {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-function PostsPage({ user }) {
-  const [posts, setPosts] = useState([]);
-  const [selectedPost, setSelectedPost] = useState(null);
+function MomentsPage({ user }) {
+  const [moments, setMoments] = useState([]);
+  const [selectedMoment, setSelectedMoment] = useState(null);
   const [image, setImage] = useState(null);
   const [caption, setCaption] = useState("");
   const [loading, setLoading] = useState(true);
-  const [posting, setPosting] = useState(false);
+  const [posting, setMomenting] = useState(false);
 
-  useEffect(() => { injectStyles("mcoe-posts-styles", STYLES); }, []);
+  useEffect(() => { injectStyles("mcoe-moments-styles", STYLES); }, []);
 
-  // ── Fetch posts ──
+  // ── Fetch moments ──
   useEffect(() => {
-    const fetchPosts = async () => {
+    const fetchMoments = async () => {
       try {
-        const res = await api.get("/api/posts");
-        setPosts(Array.isArray(res.data) ? res.data : []);
+        const res = await api.get("/api/moments");
+        setMoments(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
-        console.error("Failed to fetch posts:", err);
+        console.error("Failed to fetch moments:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchPosts();
+    fetchMoments();
   }, []);
 
   // ── Handle image selection + HEIC conversion ──
@@ -466,30 +466,30 @@ function PostsPage({ user }) {
     }
   };
 
-  // ── Submit post ──
+  // ── Submit moment ──
   const handleSubmit = async () => {
     if (!image) return;
-    setPosting(true);
+    setMomenting(true);
     try {
       const formData = new FormData();
       formData.append("image", image);
       formData.append("caption", caption);
-      const res = await api.post("/api/posts", formData);
-      setPosts((prev) => [res.data, ...prev]);
+      const res = await api.post("/api/moments", formData);
+      setMoments((prev) => [res.data, ...prev]);
       setCaption("");
       setImage(null);
     } catch (err) {
-      console.error("Post failed:", err);
+      console.error("Moment failed:", err);
     } finally {
-      setPosting(false);
+      setMomenting(false);
     }
   };
 
   // ── Optimistic like toggle ──
-  const toggleLike = async (postId) => {
-    setPosts((prev) =>
+  const toggleLike = async (momentId) => {
+    setMoments((prev) =>
       prev.map((p) => {
-        if (p._id !== postId) return p;
+        if (p._id !== momentId) return p;
         const liked = p.likes.includes(user._id);
         return {
           ...p,
@@ -500,37 +500,37 @@ function PostsPage({ user }) {
       })
     );
     try {
-      await api.put(`/api/posts/${postId}/like`);
+      await api.put(`/api/moments/${momentId}/like`);
     } catch (err) {
       console.error("Like failed:", err);
     }
   };
 
-  // ── Delete post ──
-  const deletePost = async (postId) => {
+  // ── Delete moment ──
+  const deleteMoment = async (momentId) => {
     try {
-      await api.delete(`/api/posts/delete/${postId}`);
-      setPosts((prev) => prev.filter((p) => p._id !== postId));
+      await api.delete(`/api/moments/delete/${momentId}`);
+      setMoments((prev) => prev.filter((p) => p._id !== momentId));
     } catch (err) {
       console.error("Delete failed:", err);
     }
   };
 
   // ── Add comment ──
-  const addComment = async (e, postId) => {
+  const addComment = async (e, momentId) => {
     if (e.key !== "Enter" || !e.target.value.trim()) return;
     try {
-      const res = await api.post(`/api/posts/${postId}/comment`, {
+      const res = await api.post(`/api/moments/${momentId}/comment`, {
         text: e.target.value,
       });
       const updater = (prev) =>
         prev.map((p) =>
-          p._id === postId
+          p._id === momentId
             ? { ...p, comments: [res.data, ...(p.comments || [])] }
             : p
         );
-      setPosts(updater);
-      setSelectedPost((prev) => ({
+      setMoments(updater);
+      setSelectedMoment((prev) => ({
         ...prev,
         comments: [res.data, ...(prev.comments || [])],
       }));
@@ -541,20 +541,20 @@ function PostsPage({ user }) {
   };
 
   // ── Delete comment ──
-  const deleteComment = async (postId, commentId) => {
+  const deleteComment = async (momentId, commentId) => {
     const updater = (prev) =>
       prev.map((p) =>
-        p._id === postId
+        p._id === momentId
           ? { ...p, comments: p.comments.filter((c) => c._id !== commentId) }
           : p
       );
-    setPosts(updater);
-    setSelectedPost((prev) => ({
+    setMoments(updater);
+    setSelectedMoment((prev) => ({
       ...prev,
       comments: prev.comments.filter((c) => c._id !== commentId),
     }));
     try {
-      await api.delete(`/api/posts/delete/${postId}/comment/${commentId}`);
+      await api.delete(`/api/moments/delete/${momentId}/comment/${commentId}`);
     } catch (err) {
       console.error("Comment delete failed:", err);
     }
@@ -567,18 +567,18 @@ function PostsPage({ user }) {
         {/* ── Hero ── */}
         <div className="pp-hero">
           <p className="pp-hero-eyebrow">MCOEgram</p>
-          <h1 className="pp-hero-title">Posts</h1>
+          <h1 className="pp-hero-title">Moments</h1>
           <p className="pp-hero-sub">Photos & moments from your college</p>
         </div>
 
-        {/* ── Add post button ── */}
+        {/* ── Add moment button ── */}
         <div style={{ display: "flex", justifyContent: "center" }}>
           <button
             className="pp-add-btn"
             data-bs-toggle="modal"
             data-bs-target="#ppAddModal"
           >
-            <ImagePlus size={15} /> Add Post
+            <ImagePlus size={15} /> Add Moment
           </button>
         </div>
 
@@ -586,29 +586,29 @@ function PostsPage({ user }) {
         <div className="pp-feed">
           {loading ? (
             [0, 1, 2].map((i) => <SkeletonCard key={i} />)
-          ) : posts.length === 0 ? (
+          ) : moments.length === 0 ? (
             <div className="pp-state">
-              <p>No posts yet — share your first photo!</p>
+              <p>No moments yet — share your first photo!</p>
             </div>
           ) : (
-            posts.map((post) => {
-              const isLiked = post.likes?.includes(user._id);
+            moments.map((moment) => {
+              const isLiked = moment.likes?.includes(user._id);
               return (
-                <article key={post._id} className="pp-card">
+                <article key={moment._id} className="pp-card">
                   {/* Header */}
                   <div className="pp-card-header">
                     <div className="pp-user-row">
                       <img
-                        src={post.user.profilePic}
-                        alt={post.user.name}
+                        src={moment.user.profilePic}
+                        alt={moment.user.name}
                         className="pp-avatar"
                       />
-                      <Link to={`/profile/${post.user._id}`} className="pp-username">
-                        {post.user.name}
+                      <Link to={`/profile/${moment.user._id}`} className="pp-username">
+                        {moment.user.name}
                       </Link>
                     </div>
 
-                    {post.user._id === user._id && (
+                    {moment.user._id === user._id && (
                       <div className="dropdown">
                         <button className="pp-menu-btn" data-bs-toggle="dropdown">
                           <MoreHorizontal size={18} />
@@ -616,7 +616,7 @@ function PostsPage({ user }) {
                         <ul className="dropdown-menu dropdown-menu-end">
                           <li
                             className="dropdown-item pp-delete"
-                            onClick={() => deletePost(post._id)}
+                            onClick={() => deleteMoment(moment._id)}
                           >
                             Delete
                           </li>
@@ -626,12 +626,12 @@ function PostsPage({ user }) {
                   </div>
 
                   {/* Image */}
-                  <img src={post.imageUrl} alt={post.caption} className="pp-image" />
+                  <img src={moment.imageUrl} alt={moment.caption} className="pp-image" />
 
                   {/* Caption */}
-                  {post.caption && (
+                  {moment.caption && (
                     <div className="pp-caption">
-                      <strong>{post.user.name}</strong> {post.caption}
+                      <strong>{moment.user.name}</strong> {moment.caption}
                     </div>
                   )}
 
@@ -639,20 +639,20 @@ function PostsPage({ user }) {
                   <div className="pp-actions">
                     <button
                       className={`pp-action-btn${isLiked ? " liked" : ""}`}
-                      onClick={() => toggleLike(post._id)}
+                      onClick={() => toggleLike(moment._id)}
                     >
                       <Heart size={16} fill={isLiked ? "currentColor" : "none"} />
-                      {post.likes.length}
+                      {moment.likes.length}
                     </button>
 
                     <button
                       className="pp-action-btn"
                       data-bs-toggle="modal"
                       data-bs-target="#ppCommentModal"
-                      onClick={() => setSelectedPost(post)}
+                      onClick={() => setSelectedMoment(moment)}
                     >
                       <MessageCircle size={16} />
-                      {post.comments?.length || 0}
+                      {moment.comments?.length || 0}
                     </button>
                   </div>
                 </article>
@@ -662,12 +662,12 @@ function PostsPage({ user }) {
         </div>
       </div>
 
-      {/* ── Add Post Modal ── */}
+      {/* ── Add Moment Modal ── */}
       <div className="modal fade pp-modal" id="ppAddModal">
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
-              <h5>Add Post</h5>
+              <h5>Add Moment</h5>
               <button type="button" className="btn-close" data-bs-dismiss="modal" />
             </div>
             <div className="modal-body">
@@ -691,12 +691,12 @@ function PostsPage({ user }) {
             </div>
             <div className="modal-footer">
               <button
-                className="pp-modal-post-btn"
+                className="pp-modal-moment-btn"
                 onClick={handleSubmit}
                 data-bs-dismiss="modal"
                 disabled={!image || posting}
               >
-                {posting ? "Posting…" : "Post"}
+                {posting ? "Momenting…" : "Moment"}
               </button>
             </div>
           </div>
@@ -712,16 +712,16 @@ function PostsPage({ user }) {
               <button type="button" className="btn-close" data-bs-dismiss="modal" />
             </div>
             <div className="modal-body">
-              {selectedPost && (
+              {selectedMoment && (
                 <>
                   <input
                     type="text"
                     className="pp-modal-input"
-                    placeholder="Add a comment… (Enter to post)"
-                    onKeyDown={(e) => addComment(e, selectedPost._id)}
+                    placeholder="Add a comment… (Enter to moment)"
+                    onKeyDown={(e) => addComment(e, selectedMoment._id)}
                   />
-                  {selectedPost.comments?.length > 0 ? (
-                    selectedPost.comments.map((comment) => (
+                  {selectedMoment.comments?.length > 0 ? (
+                    selectedMoment.comments.map((comment) => (
                       <div key={comment._id} className="pp-comment-item">
                         <div>
                           <strong>{comment.user.name}</strong>
@@ -731,7 +731,7 @@ function PostsPage({ user }) {
                           <button
                             className="pp-comment-delete"
                             onClick={() =>
-                              deleteComment(selectedPost._id, comment._id)
+                              deleteComment(selectedMoment._id, comment._id)
                             }
                           >
                             Delete
@@ -752,4 +752,4 @@ function PostsPage({ user }) {
   );
 }
 
-export default PostsPage;
+export default MomentsPage;

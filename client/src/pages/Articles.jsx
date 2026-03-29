@@ -305,7 +305,7 @@ function Articles({ user }) {
     const fetchArticles = async () => {
       try {
         setLoading(true);
-        const res = await api.get("/api/posts/article");
+        const res = await api.get("/api/moments/article");
         setArticles(
           res.data.filter((a) => a.user && a.user._id === effectiveUserId)
         );
@@ -333,7 +333,7 @@ function Articles({ user }) {
       })
     );
     try {
-      await api.put(`/api/posts/article/${articleId}/like`);
+      await api.put(`/api/moments/article/${articleId}/like`);
     } catch (err) {
       console.error("Like failed:", err);
     }
@@ -342,7 +342,7 @@ function Articles({ user }) {
   // ── Delete article ──
   const deleteArticle = async (articleId) => {
     try {
-      await api.delete(`/api/posts/article/delete/${articleId}`);
+      await api.delete(`/api/moments/article/delete/${articleId}`);
       setArticles((prev) => prev.filter((a) => a._id !== articleId));
     } catch (err) {
       console.error("Delete failed:", err);
@@ -354,7 +354,7 @@ function Articles({ user }) {
     if (e.key !== "Enter" || !e.target.value.trim()) return;
     try {
       const res = await api.post(
-        `/api/posts/article/${articleId}/comment`,
+        `/api/moments/article/${articleId}/comment`,
         { text: e.target.value }
       );
       const updater = (prev) =>
@@ -389,7 +389,7 @@ function Articles({ user }) {
     }));
     try {
       await api.delete(
-        `/api/posts/article/delete/${articleId}/comment/${commentId}`
+        `/api/moments/article/delete/${articleId}/comment/${commentId}`
       );
     } catch (err) {
       console.error("Comment delete failed:", err);
@@ -487,7 +487,7 @@ function Articles({ user }) {
                   <input
                     type="text"
                     className="asc-modal-input"
-                    placeholder="Add a comment… (Enter to post)"
+                    placeholder="Add a comment… (Enter to moment)"
                     onKeyDown={(e) => addComment(e, selectedArticle._id)}
                   />
                   {selectedArticle.comments?.length > 0 ? (

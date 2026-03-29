@@ -90,14 +90,14 @@ html, body {
   }
 }
 
-/* Posts Container */
-.posts-container {
+/* Moments Container */
+.moments-container {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-/* Post Card */
+/* Moment Card */
 .post-card {
   height: inherit;
   background-color: var(--bg-white);
@@ -133,7 +133,7 @@ html, body {
   }
 }
 
-/* Post Header */
+/* Moment Header */
 .post-header {
   display: flex;
   align-items: center;
@@ -202,7 +202,7 @@ html, body {
   transform: scale(0.95);
 }
 
-/* Post Image */
+/* Moment Image */
 .post-image-wrapper {
   width: 100%;
   overflow: hidden;
@@ -222,7 +222,7 @@ html, body {
   transform: scale(1.02);
 }
 
-/* Post Caption */
+/* Moment Caption */
 .post-caption {
   padding: 16px;
   border-bottom: 1px solid var(--border-light);
@@ -236,7 +236,7 @@ html, body {
   font-weight: 400;
 }
 
-/* Post Actions */
+/* Moment Actions */
 .post-actions {
   display: flex;
   align-items: center;
@@ -347,7 +347,7 @@ html, body {
     padding: 12px;
   }
 
-  .posts-container {
+  .moments-container {
     gap: 12px;
   }
 }

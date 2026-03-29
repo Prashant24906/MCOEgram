@@ -19,7 +19,7 @@ const Icons = {
       <line x1="10" y1="9" x2="8" y2="9"/>
     </svg>
   ),
-  Posts: () => (
+  Moments: () => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
       <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
@@ -356,7 +356,7 @@ function Navbar() {
 
   const navItems = [
     { to: dest("/ArticlesPage"), icon: <Icons.Articles />, label: "Articles",  tip: "Articles" },
-    { to: dest("/PostsPage"),    icon: <Icons.Posts />,    label: "Posts",     tip: "Posts"    },
+    { to: dest("/MomentsPage"),    icon: <Icons.Moments />,    label: "Moments",     tip: "Moments"    },
     { to: dest("/chats"),        icon: <Icons.Chat />,     label: "Chat",      tip: "Chat"     },
     { to: dest("/me"),           icon: <Icons.Profile />,  label: "Profile",   tip: "Profile"  },
   ];

@@ -23,12 +23,12 @@ app.use(express.urlencoded({ extended: true }));
 app.options(/.*/, cors());
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
-const postRoutes = require("./routes/postRoutes");
+const momentRoutes = require("./routes/momentRoutes");
 const User = require("./models/User");
 const Chat = require("./models/Chat");
 const Message = require("./models/Message");
 
-app.use("/api/posts", postRoutes);
+app.use("/api/moments", momentRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);

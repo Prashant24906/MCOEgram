@@ -24,7 +24,7 @@ const STYLES = `
     gap: 18px;
   }
 
-  /* ── Post card ── */
+  /* ── Moment card ── */
   .psc-card {
     background: var(--mcoe-card);
     border: 1px solid var(--mcoe-border);
@@ -99,7 +99,7 @@ const STYLES = `
     color: var(--mcoe-text);
   }
 
-  /* ── Post image ── */
+  /* ── Moment image ── */
   .psc-image {
     width: 100%;
     display: block;
@@ -295,40 +295,40 @@ function SkeletonCard() {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-function Posts({ currentUser }) {
+function Moments({ currentUser }) {
   const { userId } = useParams();
   const effectiveUserId = userId || currentUser?._id;
 
-  const [posts, setPosts] = useState([]);
-  const [selectedPost, setSelectedPost] = useState(null);
+  const [moments, setMoments] = useState([]);
+  const [selectedMoment, setSelectedMoment] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { injectStyles("mcoe-posts-sub-styles", STYLES); }, []);
+  useEffect(() => { injectStyles("mcoe-moments-sub-styles", STYLES); }, []);
 
-  // ── Fetch posts for this profile ──
+  // ── Fetch moments for this profile ──
   useEffect(() => {
     if (!effectiveUserId) return;
-    const fetchPosts = async () => {
+    const fetchMoments = async () => {
       try {
         setLoading(true);
-        const res = await api.get("/api/posts");
-        setPosts(
+        const res = await api.get("/api/moments");
+        setMoments(
           res.data.filter((p) => p.user && p.user._id === effectiveUserId)
         );
       } catch (err) {
-        console.error("Failed to fetch posts:", err);
+        console.error("Failed to fetch moments:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchPosts();
+    fetchMoments();
   }, [effectiveUserId]);
 
   // ── Optimistic like toggle ──
-  const toggleLike = async (postId) => {
-    setPosts((prev) =>
+  const toggleLike = async (momentId) => {
+    setMoments((prev) =>
       prev.map((p) => {
-        if (p._id !== postId) return p;
+        if (p._id !== momentId) return p;
         const liked = p.likes.includes(currentUser._id);
         return {
           ...p,
@@ -339,37 +339,37 @@ function Posts({ currentUser }) {
       })
     );
     try {
-      await api.put(`/api/posts/${postId}/like`);
+      await api.put(`/api/moments/${momentId}/like`);
     } catch (err) {
       console.error("Like failed:", err);
     }
   };
 
-  // ── Delete post ──
-  const deletePost = async (postId) => {
+  // ── Delete moment ──
+  const deleteMoment = async (momentId) => {
     try {
-      await api.delete(`/api/posts/delete/${postId}`);
-      setPosts((prev) => prev.filter((p) => p._id !== postId));
+      await api.delete(`/api/moments/delete/${momentId}`);
+      setMoments((prev) => prev.filter((p) => p._id !== momentId));
     } catch (err) {
       console.error("Delete failed:", err);
     }
   };
 
   // ── Add comment ──
-  const addComment = async (e, postId) => {
+  const addComment = async (e, momentId) => {
     if (e.key !== "Enter" || !e.target.value.trim()) return;
     try {
-      const res = await api.post(`/api/posts/${postId}/comment`, {
+      const res = await api.post(`/api/moments/${momentId}/comment`, {
         text: e.target.value,
       });
       const updater = (prev) =>
         prev.map((p) =>
-          p._id === postId
+          p._id === momentId
             ? { ...p, comments: [res.data, ...(p.comments || [])] }
             : p
         );
-      setPosts(updater);
-      setSelectedPost((prev) => ({
+      setMoments(updater);
+      setSelectedMoment((prev) => ({
         ...prev,
         comments: [res.data, ...(prev.comments || [])],
       }));
@@ -380,20 +380,20 @@ function Posts({ currentUser }) {
   };
 
   // ── Delete comment ──
-  const deleteComment = async (postId, commentId) => {
+  const deleteComment = async (momentId, commentId) => {
     const updater = (prev) =>
       prev.map((p) =>
-        p._id === postId
+        p._id === momentId
           ? { ...p, comments: p.comments.filter((c) => c._id !== commentId) }
           : p
       );
-    setPosts(updater);
-    setSelectedPost((prev) => ({
+    setMoments(updater);
+    setSelectedMoment((prev) => ({
       ...prev,
       comments: prev.comments.filter((c) => c._id !== commentId),
     }));
     try {
-      await api.delete(`/api/posts/delete/${postId}/comment/${commentId}`);
+      await api.delete(`/api/moments/delete/${momentId}/comment/${commentId}`);
     } catch (err) {
       console.error("Comment delete failed:", err);
     }
@@ -403,32 +403,32 @@ function Posts({ currentUser }) {
 
   return (
     <div className="psc-wrap">
-      <p className="psc-section-title">Posts</p>
+      <p className="psc-section-title">Moments</p>
 
       {loading ? (
         <div className="psc-grid">
           {[0, 1].map((i) => <SkeletonCard key={i} />)}
         </div>
-      ) : posts.length === 0 ? (
-        <div className="psc-state">No posts yet.</div>
+      ) : moments.length === 0 ? (
+        <div className="psc-state">No moments yet.</div>
       ) : (
         <div className="psc-grid">
-          {posts.map((post) => {
-            const isLiked = post.likes.includes(currentUser._id);
+          {moments.map((moment) => {
+            const isLiked = moment.likes.includes(currentUser._id);
             return (
-              <article key={post._id} className="psc-card">
+              <article key={moment._id} className="psc-card">
                 {/* Header */}
                 <div className="psc-card-header">
                   <div className="psc-user-row">
                     <img
-                      src={post.user.profilePic}
-                      alt={post.user.name}
+                      src={moment.user.profilePic}
+                      alt={moment.user.name}
                       className="psc-avatar"
                     />
-                    <span className="psc-username">{post.user.name}</span>
+                    <span className="psc-username">{moment.user.name}</span>
                   </div>
 
-                  {post.user._id === currentUser._id && (
+                  {moment.user._id === currentUser._id && (
                     <div className="dropdown">
                       <button className="psc-menu-btn" data-bs-toggle="dropdown">
                         <MoreHorizontal size={17} />
@@ -436,7 +436,7 @@ function Posts({ currentUser }) {
                       <ul className="dropdown-menu dropdown-menu-end">
                         <li
                           className="dropdown-item psc-delete"
-                          onClick={() => deletePost(post._id)}
+                          onClick={() => deleteMoment(moment._id)}
                         >
                           Delete
                         </li>
@@ -446,12 +446,12 @@ function Posts({ currentUser }) {
                 </div>
 
                 {/* Image */}
-                <img src={post.imageUrl} alt={post.caption} className="psc-image" />
+                <img src={moment.imageUrl} alt={moment.caption} className="psc-image" />
 
                 {/* Caption */}
-                {post.caption && (
+                {moment.caption && (
                   <div className="psc-caption">
-                    <strong>{post.user.name}</strong> {post.caption}
+                    <strong>{moment.user.name}</strong> {moment.caption}
                   </div>
                 )}
 
@@ -459,20 +459,20 @@ function Posts({ currentUser }) {
                 <div className="psc-actions">
                   <button
                     className={`psc-action-btn${isLiked ? " liked" : ""}`}
-                    onClick={() => toggleLike(post._id)}
+                    onClick={() => toggleLike(moment._id)}
                   >
                     <Heart size={15} fill={isLiked ? "currentColor" : "none"} />
-                    {post.likes.length}
+                    {moment.likes.length}
                   </button>
 
                   <button
                     className="psc-action-btn"
                     data-bs-toggle="modal"
                     data-bs-target="#pscCommentModal"
-                    onClick={() => setSelectedPost(post)}
+                    onClick={() => setSelectedMoment(moment)}
                   >
                     <MessageCircle size={15} />
-                    {post.comments?.length || 0}
+                    {moment.comments?.length || 0}
                   </button>
                 </div>
               </article>
@@ -490,16 +490,16 @@ function Posts({ currentUser }) {
               <button type="button" className="btn-close" data-bs-dismiss="modal" />
             </div>
             <div className="modal-body">
-              {selectedPost && (
+              {selectedMoment && (
                 <>
                   <input
                     type="text"
                     className="psc-modal-input"
-                    placeholder="Add a comment… (Enter to post)"
-                    onKeyDown={(e) => addComment(e, selectedPost._id)}
+                    placeholder="Add a comment… (Enter to moment)"
+                    onKeyDown={(e) => addComment(e, selectedMoment._id)}
                   />
-                  {selectedPost.comments?.length > 0 ? (
-                    selectedPost.comments.map((comment) => (
+                  {selectedMoment.comments?.length > 0 ? (
+                    selectedMoment.comments.map((comment) => (
                       <div key={comment._id} className="psc-comment-item">
                         <div>
                           <strong>{comment.user.name}</strong>
@@ -509,7 +509,7 @@ function Posts({ currentUser }) {
                           <button
                             className="psc-comment-delete"
                             onClick={() =>
-                              deleteComment(selectedPost._id, comment._id)
+                              deleteComment(selectedMoment._id, comment._id)
                             }
                           >
                             Delete
@@ -530,4 +530,4 @@ function Posts({ currentUser }) {
   );
 }
 
-export default Posts;
+export default Moments;

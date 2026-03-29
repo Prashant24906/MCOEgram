@@ -1,31 +1,31 @@
 const cloudinary = require("../config/cloudinary");
-const Post = require("../models/Post");
+const Moment = require("../models/Moment");
 const Article = require("../models/Article");
 const Comment = require("../models/Comment");
 const CommentArticle = require("../models/CommentArticle");
 
-exports.getPosts = async (req, res) => {
+exports.getMoments = async (req, res) => {
   try {
-    const posts = await Post.find()
+    const moments = await Moment.find()
       .populate("user", "name profilePic")
       .sort({ createdAt: -1 });
 
-    const postsWithComments = await Promise.all(
-      posts.map(async (post) => {
-        const comments = await Comment.find({ post: post._id })
+    const momentsWithComments = await Promise.all(
+      moments.map(async (moment) => {
+        const comments = await Comment.find({ moment: moment._id })
           .populate("user", "name profilePic")
           .sort({ createdAt: -1 });
 
         return {
-          ...post.toObject(),
+          ...moment.toObject(),
           comments,
         };
       }),
     );
 
-    res.json(postsWithComments);
+    res.json(momentsWithComments);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch posts" });
+    res.status(500).json({ message: "Failed to fetch moments" });
   }
 };
 
@@ -48,7 +48,7 @@ exports.getArticle = async (req, res) => {
     );
     res.json(WithComments);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch posts" });
+    res.status(500).json({ message: "Failed to fetch moments" });
   }
 };
 
@@ -57,7 +57,7 @@ exports.addComment = async (req, res) => {
     const { text } = req.body;
 
     const comment = await Comment.create({
-      post: req.params.id,
+      moment: req.params.id,
       user: req.user._id,
       text,
     });
@@ -117,26 +117,26 @@ exports.toggleArticleLike = async (req, res) => {
 
 exports.toggleLike = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    const moment = await Moment.findById(req.params.id);
 
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
+    if (!moment) {
+      return res.status(404).json({ message: "Moment not found" });
     }
 
     const userId = req.user._id.toString();
 
-    const alreadyLiked = post.likes.some((id) => id.toString() === userId);
+    const alreadyLiked = moment.likes.some((id) => id.toString() === userId);
 
     if (alreadyLiked) {
-      post.likes = post.likes.filter((id) => id.toString() !== userId);
+      moment.likes = moment.likes.filter((id) => id.toString() !== userId);
     } else {
-      post.likes.push(userId);
+      moment.likes.push(userId);
     }
 
-    await post.save();
+    await moment.save();
 
     res.json({
-      likesCount: post.likes.length,
+      likesCount: moment.likes.length,
       liked: !alreadyLiked,
     });
   } catch (error) {
@@ -144,7 +144,7 @@ exports.toggleLike = async (req, res) => {
   }
 };
 
-exports.createPost = async (req, res) => {
+exports.createMoment = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No image uploaded" });
@@ -167,16 +167,16 @@ exports.createPost = async (req, res) => {
 
     const result = await uploadToCloudinary();
 
-    const post = await Post.create({
+    const moment = await Moment.create({
       user: req.user._id,
       imageUrl: result.secure_url,
       caption,
     });
 
-    res.status(201).json(post);
+    res.status(201).json(moment);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Post creation failed" });
+    res.status(500).json({ message: "Moment creation failed" });
   }
 };
 exports.createArticle = async (req, res) => {

@@ -1,16 +1,16 @@
 const express = require("express");
 const router = express.Router();
-const Post = require("../models/Post");
+const Moment = require("../models/Moment");
 const Article = require("../models/Article");
 const CommentArticle = require("../models/CommentArticle");
 const Comment = require("../models/Comment");
 const { protect } = require("../middlewares/authMiddleware");
 const upload = require("../middlewares/uploadMiddleware");
-const { createPost, getPosts, toggleLike, addComment ,createArticle,getArticle,toggleArticleLike,addArticleComment} =  require("../controllers/postController");
+const { createMoment, getMoments, toggleLike, addComment ,createArticle,getArticle,toggleArticleLike,addArticleComment} =  require("../controllers/momentController");
 
 router.get("/user/:userId", async (req, res) => {
   try {
-    const posts = await Post.find({ user: req.params.userId })
+    const moments = await Moment.find({ user: req.params.userId })
       .populate("user")
       .populate({
         path: "comments",
@@ -21,35 +21,35 @@ router.get("/user/:userId", async (req, res) => {
       })
       .sort({ createdAt: -1 });
 
-    res.json(posts);
+    res.json(moments);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
-router.get("/", protect, getPosts);
-router.post("/", protect, upload.single("image"), createPost);
+router.get("/", protect, getMoments);
+router.post("/", protect, upload.single("image"), createMoment);
 router.post("/:id/comment", protect, addComment);
 router.put("/:id/like", protect, toggleLike);
-router.delete("/delete/:postId", protect,async (req, res) => {
+router.delete("/delete/:momentId", protect,async (req, res) => {
       try {
-    // Find the post
-    var post = await Post.findById(req.params.postId)
-    if(!post) return res.status(404).json("Not found")
-    if(post.user.toString()!==req.user.id) {
+    // Find the moment
+    var moment = await Moment.findById(req.params.momentId)
+    if(!moment) return res.status(404).json("Not found")
+    if(moment.user.toString()!==req.user.id) {
         return res.status(401).send("Not Allowed")
     }
-    const status = await post.deleteOne()
+    const status = await moment.deleteOne()
     res.json(status);
     } catch (error) {
       res.status(400).json({ error: "Some error occured" });
     }
 });
-router.delete("/delete/:postId/comment/:commentid", protect,async (req, res) => {
+router.delete("/delete/:momentId/comment/:commentid", protect,async (req, res) => {
   try {
     var comment = await Comment.findById(req.params.commentid)
-    var post = await Post.findById(req.params.postId)
+    var moment = await Moment.findById(req.params.momentId)
     if(!comment) return res.status(404).json("Not found")
         if(comment.user.toString()!==req.user.id) {
         return res.status(401).send("Not Allowed")
@@ -64,7 +64,7 @@ router.delete("/delete/:postId/comment/:commentid", protect,async (req, res) => 
 
 router.delete("/article/delete/:articleId", protect,async (req, res) => {
       try {
-    // Find the post
+    // Find the moment
     var article = await Article.findById(req.params.articleId)
     if(!article) return res.status(404).json("Not found")
     if(article.user.toString()!==req.user.id) {

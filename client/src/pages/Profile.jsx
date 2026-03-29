@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import { MessageSquare, Grid, BookOpen } from "lucide-react";
-import Posts from "./Posts";
+import Moments from "./Moments";
 import Articles from "./Articles";
 import UpdateProfile from "./UpdateProfile";
 import TextField from "@mui/material/TextField";
@@ -365,7 +365,7 @@ function Profile({ currentUser }) {
   const isOwnProfile = currentUser?._id === effectiveUserId;
 
   const [profileUser, setProfileUser] = useState(null);
-  const [posts, setPosts] = useState([]);
+  const [moments, setMoments] = useState([]);
   const [articles, setArticles] = useState([]);
   const [selectedFeed, setSelectedFeed] = useState("Articles");
   const [credentials, setCredentials] = useState({
@@ -382,13 +382,13 @@ function Profile({ currentUser }) {
       try {
         const [userRes, postsRes, articlesRes] = await Promise.all([
           api.get(`/api/users/${effectiveUserId}`),
-          api.get(`/api/posts`),
-          api.get(`/api/posts/article`),
+          api.get(`/api/moments`),
+          api.get(`/api/moments/article`),
         ]);
 
         setProfileUser(userRes.data);
 
-        setPosts(
+        setMoments(
           postsRes.data.filter(
             (p) => p.user && p.user._id === effectiveUserId
           )
@@ -501,8 +501,8 @@ function Profile({ currentUser }) {
                 <span className="prp-stat-label">Articles</span>
               </div>
               <div className="prp-stat">
-                <span className="prp-stat-value">{posts.length}</span>
-                <span className="prp-stat-label">Posts</span>
+                <span className="prp-stat-value">{moments.length}</span>
+                <span className="prp-stat-label">Moments</span>
               </div>
             </div>
           </div>
@@ -517,17 +517,17 @@ function Profile({ currentUser }) {
             <BookOpen size={14} /> Articles
           </button>
           <button
-            className={`prp-tab${selectedFeed === "Posts" ? " active" : ""}`}
-            onClick={() => setSelectedFeed("Posts")}
+            className={`prp-tab${selectedFeed === "Moments" ? " active" : ""}`}
+            onClick={() => setSelectedFeed("Moments")}
           >
-            <Grid size={14} /> Posts
+            <Grid size={14} /> Moments
           </button>
         </div>
 
         {/* ── Feed content ── */}
         <div className="prp-feed-area">
-          {selectedFeed === "Posts" ? (
-            <Posts currentUser={currentUser} />
+          {selectedFeed === "Moments" ? (
+            <Moments currentUser={currentUser} />
           ) : (
             <Articles user={currentUser} />
           )}

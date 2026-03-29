@@ -6,8 +6,8 @@ import Navbar from "./components/Navbar";
 import Profile from "./pages/Profile";
 import ChatsPage from "./pages/ChatPage";
 import UpdateProfile from './pages/UpdateProfile'
-import PostsPage from "./pages/PostsPage";
-import Posts from "./pages/Posts";
+import MomentsPage from "./pages/MomentsPage";
+import Moments from "./pages/Moments";
 import ArticlesPage from "./pages/ArticlesPage";
 import socket from "./sockets";
 
@@ -71,8 +71,8 @@ function App() {
         />
         <Route
           exact
-          path="/PostsPage"
-          element={user ? <PostsPage user={user} /> : <Login setUser={setUser} />}
+          path="/MomentsPage"
+          element={user ? <MomentsPage user={user} /> : <Login setUser={setUser} />}
         />
         <Route exact path="/login" element={<Login setUser={setUser} />} />
         <Route
@@ -88,7 +88,7 @@ function App() {
         />
         <Route
           path="/profile/:userId/Articles"
-          element={<Posts currentUser={user} />}
+          element={<Moments currentUser={user} />}
         />
 
         <Route path="/me" element={<Profile currentUser={user} />} />

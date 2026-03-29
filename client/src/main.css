@@ -27,7 +27,7 @@ position: relative;
 .root{
     background: #000000;
 }
-.Post{
+.Moment{
     border-radius: 5px;
     margin: 1rem;
     padding-bottom: 5px;
@@ -90,7 +90,7 @@ position: relative;
     height: 2rem;
     width: 2rem;
 }
-.FooterPost{
+.FooterMoment{
     height: 100%;
     width: 100%;
     display: flex;
@@ -106,7 +106,7 @@ position: relative;
     display: flex;
     flex-direction: column;
 }
-.Feed-Post-header{
+.Feed-Moment-header{
     display: flex;
     flex-direction: row;
     align-items: center;
