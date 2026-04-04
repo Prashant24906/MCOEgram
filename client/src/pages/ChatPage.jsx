@@ -736,7 +736,15 @@ function ChatsPage({ user }) {
                     </div>
 
                     <div className="cp-chat-info">
-                      <div className="cp-chat-name">{other.name}</div>
+                      <div
+                        className="cp-chat-name"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/profile/${other._id}`);
+                        }}
+                      >
+                        {other.name}
+                      </div>
                       <div className="cp-chat-preview">
                         {chat.lastMessage?.text
                           ? chat.lastMessage.text.slice(0, 30) +
