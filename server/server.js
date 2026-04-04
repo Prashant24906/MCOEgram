@@ -24,6 +24,7 @@ app.options(/.*/, cors());
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const momentRoutes = require("./routes/momentRoutes");
+const friendRoutes = require("./routes/friendRoutes");
 const User = require("./models/User");
 const Chat = require("./models/Chat");
 const Message = require("./models/Message");
@@ -32,6 +33,7 @@ app.use("/api/moments", momentRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/friends", friendRoutes);
 
 app.get("/", (req, res) => res.send("MOCEgram API Running"));
 app.use((err, req, res, next) => {

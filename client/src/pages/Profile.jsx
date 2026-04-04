@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-import { MessageSquare, Grid, BookOpen } from "lucide-react";
+import { MessageSquare, Grid, BookOpen, UserPlus, UserCheck, Clock } from "lucide-react";
 import Moments from "./Moments";
 import Articles from "./Articles";
 import UpdateProfile from "./UpdateProfile";
@@ -155,6 +155,65 @@ const STYLES = `
 
   .prp-btn-secondary:hover {
     background: rgba(56,217,192,0.1);
+    transform: translateY(-1px);
+  }
+
+  /* ── Friend request button states ── */
+  .prp-btn-friend {
+    padding: 9px 20px;
+    border-radius: var(--radius-sm);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+  }
+
+  .prp-btn-friend.send {
+    background: var(--mcoe-gold);
+    color: var(--mcoe-navy);
+  }
+  .prp-btn-friend.send:hover {
+    background: #ffd84d;
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-1px);
+  }
+
+  .prp-btn-friend.sent {
+    background: var(--mcoe-gold-dim);
+    color: var(--mcoe-gold);
+    border: 1px solid rgba(245,200,66,0.35);
+    cursor: default;
+  }
+
+  .prp-btn-friend.cancel {
+    background: rgba(255,92,110,0.1);
+    color: var(--mcoe-danger);
+    border: 1px solid rgba(255,92,110,0.3);
+  }
+  .prp-btn-friend.cancel:hover {
+    background: rgba(255,92,110,0.2);
+    transform: translateY(-1px);
+  }
+
+  .prp-btn-friend.friends {
+    background: rgba(56,217,192,0.12);
+    color: var(--mcoe-teal);
+    border: 1px solid rgba(56,217,192,0.3);
+    cursor: default;
+  }
+
+  .prp-btn-friend.incoming {
+    background: var(--mcoe-gold);
+    color: var(--mcoe-navy);
+  }
+  .prp-btn-friend.incoming:hover {
+    background: #ffd84d;
+    box-shadow: var(--shadow-glow);
     transform: translateY(-1px);
   }
 
@@ -372,6 +431,12 @@ function Profile({ currentUser }) {
     name: "", bio: "", year: "", department: "",
   });
 
+  // ── Friend request state ──
+  // status: "none" | "pending_sent" | "pending_received" | "accepted" | "rejected"
+  const [friendStatus, setFriendStatus] = useState("none");
+  const [friendRequestId, setFriendRequestId] = useState(null);
+  const [friendLoading, setFriendLoading] = useState(false);
+
   useEffect(() => { injectStyles("mcoe-profile-styles", STYLES); }, []);
 
   // ── Single consolidated data fetch (fixes duplicate API calls) ──
@@ -380,11 +445,19 @@ function Profile({ currentUser }) {
 
     const fetchAll = async () => {
       try {
-        const [userRes, postsRes, articlesRes] = await Promise.all([
+        const requests = [
           api.get(`/api/users/${effectiveUserId}`),
           api.get(`/api/moments`),
           api.get(`/api/moments/article`),
-        ]);
+        ];
+
+        // Fetch friendship status only when viewing someone else's profile
+        if (!isOwnProfile) {
+          requests.push(api.get(`/api/friends/status/${effectiveUserId}`));
+        }
+
+        const [userRes, postsRes, articlesRes, friendRes] =
+          await Promise.all(requests);
 
         setProfileUser(userRes.data);
 
@@ -399,13 +472,18 @@ function Profile({ currentUser }) {
             (a) => a.user && a.user._id === effectiveUserId
           )
         );
+
+        if (friendRes) {
+          setFriendStatus(friendRes.data.status);
+          setFriendRequestId(friendRes.data.requestId);
+        }
       } catch (err) {
         console.error("Profile fetch failed:", err);
       }
     };
 
     fetchAll();
-  }, [effectiveUserId, currentUser]);
+  }, [effectiveUserId, currentUser, isOwnProfile]);
 
   // ── Sync edit form when profileUser loads ──
   useEffect(() => {
@@ -432,6 +510,90 @@ function Profile({ currentUser }) {
 
   const navigateToChat = () =>
     navigate("/chats", { state: { selectedUser: profileUser } });
+
+  // ── Friend request handlers ──
+  const sendFriendRequest = async () => {
+    setFriendLoading(true);
+    try {
+      const res = await api.post(`/api/friends/request/${effectiveUserId}`);
+      setFriendStatus("pending_sent");
+      setFriendRequestId(res.data._id);
+    } catch (err) {
+      // If a request already exists (409) re-sync status
+      if (err.response?.status === 409) {
+        setFriendStatus(err.response.data.request?.status === "accepted" ? "accepted" : "pending_sent");
+      }
+      console.error("Send request failed:", err);
+    } finally {
+      setFriendLoading(false);
+    }
+  };
+
+  const cancelFriendRequest = async () => {
+    setFriendLoading(true);
+    try {
+      await api.delete(`/api/friends/request/${effectiveUserId}`);
+      setFriendStatus("none");
+      setFriendRequestId(null);
+    } catch (err) {
+      console.error("Cancel request failed:", err);
+    } finally {
+      setFriendLoading(false);
+    }
+  };
+
+  const acceptFriendRequest = async () => {
+    if (!friendRequestId) return;
+    setFriendLoading(true);
+    try {
+      await api.put(`/api/friends/request/${friendRequestId}/accept`);
+      setFriendStatus("accepted");
+    } catch (err) {
+      console.error("Accept request failed:", err);
+    } finally {
+      setFriendLoading(false);
+    }
+  };
+
+  // ── Render the correct friend button based on status ──
+  const renderFriendBtn = () => {
+    if (friendLoading) {
+      return (
+        <button className="prp-btn-friend sent" disabled>
+          <Clock size={14} /> Loading…
+        </button>
+      );
+    }
+    switch (friendStatus) {
+      case "none":
+      case "rejected":
+        return (
+          <button className="prp-btn-friend send" onClick={sendFriendRequest}>
+            <UserPlus size={14} /> Add Friend
+          </button>
+        );
+      case "pending_sent":
+        return (
+          <button className="prp-btn-friend cancel" onClick={cancelFriendRequest}>
+            <Clock size={14} /> Cancel Request
+          </button>
+        );
+      case "pending_received":
+        return (
+          <button className="prp-btn-friend incoming" onClick={acceptFriendRequest}>
+            <UserCheck size={14} /> Accept Request
+          </button>
+        );
+      case "accepted":
+        return (
+          <button className="prp-btn-friend friends" disabled>
+            <UserCheck size={14} /> Friends
+          </button>
+        );
+      default:
+        return null;
+    }
+  };
 
   // ── Guards ──
   if (!currentUser) return null;
@@ -485,9 +647,12 @@ function Profile({ currentUser }) {
                     Edit Profile
                   </button>
                 ) : (
-                  <button className="prp-btn-secondary" onClick={navigateToChat}>
-                    <MessageSquare size={14} /> Message
-                  </button>
+                  <>
+                    {renderFriendBtn()}
+                    <button className="prp-btn-secondary" onClick={navigateToChat}>
+                      <MessageSquare size={14} /> Message
+                    </button>
+                  </>
                 )}
               </div>
             </div>
