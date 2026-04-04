@@ -798,6 +798,8 @@ function ChatsPage({ user }) {
                 currentUser={user}
                 selectedUserName={selectedUser.name}
                 selectedUserID={selectedUser._id}
+                selectedUserPic={selectedUser.profilePic}
+                isOnline={isOnline(selectedUser._id)}
                 receiverId={selectedUser._id}
               />
             </>

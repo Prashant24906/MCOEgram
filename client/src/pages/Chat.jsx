@@ -5,11 +5,14 @@ import api from "../api/axios";
 import "../main.css";
 import "../style/Chat.css";
 
-function Chat({ currentUser, selectedUserName, selectedUserID, receiverId }) {
+function Chat({ currentUser, selectedUserName, selectedUserID, selectedUserPic, isOnline, receiverId }) {
   const messagesEndRef = useRef(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const navigate = useNavigate();
+
+  const getInitials = (name = "") =>
+    name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
 
   const formatTime = (dateString) => {
     const date = new Date(dateString);
@@ -125,14 +128,53 @@ function Chat({ currentUser, selectedUserName, selectedUserID, receiverId }) {
   return (
     <div className="Chat-layout" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
 
-      {/* ── Header ── */}
-      <div className="chat-box">
-        <span
-          className="user-list"
+      {/* ── Enhanced Header ── */}
+      <div className="chat-header">
+
+        {/* Avatar with online indicator */}
+        <div className="chat-header-avatar-wrap">
+          {selectedUserPic ? (
+            <img
+              src={selectedUserPic}
+              alt={selectedUserName}
+              className="chat-header-avatar"
+            />
+          ) : (
+            <div className="chat-header-avatar-initials">
+              {getInitials(selectedUserName)}
+            </div>
+          )}
+          {isOnline && <span className="chat-header-online-dot" />}
+        </div>
+
+        {/* Name + online status */}
+        <div className="chat-header-info">
+          <div
+            className="chat-header-name"
+            onClick={() => navigate(`/profile/${selectedUserID}`)}
+            title="View profile"
+          >
+            {selectedUserName}
+          </div>
+          <div className={`chat-header-status${isOnline ? "" : " offline"}`}>
+            <span className="chat-header-status-dot" />
+            {isOnline ? "Active now" : "Offline"}
+          </div>
+        </div>
+
+        {/* Profile shortcut button */}
+        <button
+          className="chat-header-profile-btn"
           onClick={() => navigate(`/profile/${selectedUserID}`)}
+          title="View profile"
         >
-          {selectedUserName}
-        </span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          Profile
+        </button>
       </div>
 
       {/* ── Messages area ── */}

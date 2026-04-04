@@ -1,12 +1,135 @@
-.Chat-layout{
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    background-color: #6788d0;
+/* ─── Chat Layout ───────────────────────────────────────────────────────────── */
+.Chat-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #0f1b35;
+  font-family: 'DM Sans', sans-serif;
 }
-.chat-box{
-    padding: 15px;
-   background-color: #111840;
-          border-bottom: 1px solid #2a0c0c;
-          font-weight: bold;
+
+/* ─── Enhanced Header ────────────────────────────────────────────────────────── */
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #1e2d54 0%, #162040 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  min-height: 70px;
+}
+
+/* Avatar wrapper — relative so the online dot can sit on top */
+.chat-header-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.chat-header-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2.5px solid #f5c842;
+  box-shadow: 0 0 0 3px rgba(245, 200, 66, 0.18);
+  display: block;
+}
+
+/* Fallback initials avatar */
+.chat-header-avatar-initials {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #38d9c0 0%, #1a8fd1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  border: 2.5px solid #f5c842;
+  box-shadow: 0 0 0 3px rgba(245, 200, 66, 0.18);
+  flex-shrink: 0;
+}
+
+/* Online indicator dot */
+.chat-header-online-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #3ddc84;
+  border: 2.5px solid #162040;
+}
+
+/* Text block */
+.chat-header-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-header-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #e8eaf2;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s;
+  letter-spacing: -0.2px;
+}
+
+.chat-header-name:hover {
+  color: #f5c842;
+}
+
+.chat-header-status {
+  font-size: 12px;
+  color: #3ddc84;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.chat-header-status.offline {
+  color: #7a86a8;
+}
+
+.chat-header-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* Profile link icon button */
+.chat-header-profile-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #7a86a8;
+  cursor: pointer;
+  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.chat-header-profile-btn:hover {
+  background: rgba(245, 200, 66, 0.1);
+  border-color: rgba(245, 200, 66, 0.35);
+  color: #f5c842;
 }
