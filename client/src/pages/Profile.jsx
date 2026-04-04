@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-import { MessageSquare, Grid, BookOpen, UserPlus, UserCheck, Clock } from "lucide-react";
+import { MessageSquare, Grid, BookOpen, UserPlus, UserCheck, Clock, Camera } from "lucide-react";
 import Moments from "./Moments";
 import Articles from "./Articles";
 import UpdateProfile from "./UpdateProfile";
@@ -72,6 +72,51 @@ const STYLES = `
     object-fit: cover;
     border: 3px solid var(--mcoe-gold);
     box-shadow: 0 0 0 4px var(--mcoe-gold-dim);
+  }
+
+  /* Camera overlay on own profile */
+  .prp-avatar-edit {
+    position: relative;
+    cursor: pointer;
+    display: inline-block;
+  }
+
+  .prp-avatar-edit:hover .prp-avatar-overlay {
+    opacity: 1;
+  }
+
+  .prp-avatar-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.52);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    opacity: 0;
+    transition: var(--transition);
+    color: #fff;
+    font-size: 10px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    cursor: pointer;
+  }
+
+  .prp-avatar-uploading {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mcoe-gold);
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
   }
 
   /* ── Info section ── */
@@ -437,6 +482,9 @@ function Profile({ currentUser }) {
   const [friendRequestId, setFriendRequestId] = useState(null);
   const [friendLoading, setFriendLoading] = useState(false);
 
+  // ── Profile pic upload state ──
+  const [picUploading, setPicUploading] = useState(false);
+
   useEffect(() => { injectStyles("mcoe-profile-styles", STYLES); }, []);
 
   // ── Single consolidated data fetch (fixes duplicate API calls) ──
@@ -595,6 +643,26 @@ function Profile({ currentUser }) {
     }
   };
 
+  // ── Profile picture upload handler ──
+  const handlePicChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setPicUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("profilePic", file);
+      const res = await api.put("/api/users/update-pic", formData);
+      // Update local profileUser so avatar re-renders immediately
+      setProfileUser((prev) => ({ ...prev, profilePic: res.data.profilePic }));
+    } catch (err) {
+      console.error("Profile pic upload failed:", err);
+    } finally {
+      setPicUploading(false);
+      // Reset the file input so the same file can be re-selected
+      e.target.value = "";
+    }
+  };
+
   // ── Guards ──
   if (!currentUser) return null;
   if (!profileUser) {
@@ -616,11 +684,38 @@ function Profile({ currentUser }) {
         <div className="prp-hero-band">
           <div className="prp-hero-inner">
             <div className="prp-avatar-wrap">
-              <img
-                src={profileUser.profilePic}
-                alt={profileUser.name}
-                className="prp-avatar"
-              />
+              {isOwnProfile ? (
+                /* Clickable avatar for own profile */
+                <label className="prp-avatar-edit" title="Change profile picture">
+                  <img
+                    src={profileUser.profilePic}
+                    alt={profileUser.name}
+                    className="prp-avatar"
+                    style={picUploading ? { opacity: 0.5 } : {}}
+                  />
+                  {picUploading ? (
+                    <div className="prp-avatar-uploading">⏳</div>
+                  ) : (
+                    <div className="prp-avatar-overlay">
+                      <Camera size={20} />
+                      Change
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    onChange={handlePicChange}
+                    disabled={picUploading}
+                  />
+                </label>
+              ) : (
+                <img
+                  src={profileUser.profilePic}
+                  alt={profileUser.name}
+                  className="prp-avatar"
+                />
+              )}
             </div>
 
             <div className="prp-info">

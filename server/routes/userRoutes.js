@@ -7,6 +7,43 @@ router.get("/me", protect, async (req, res) => {
   res.json(req.user);
 });
 
+const cloudinary = require("../config/cloudinary");
+const upload = require("../middlewares/uploadMiddleware");
+
+router.put("/update-pic", protect, upload.single("profilePic"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No image uploaded" });
+    }
+
+    // Upload buffer to Cloudinary (same pattern as createMoment)
+    const uploadToCloudinary = () =>
+      new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "mcoegram/profile_pics" },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+
+    const result = await uploadToCloudinary();
+
+    const user = await require("../models/User").findByIdAndUpdate(
+      req.user._id,
+      { profilePic: result.secure_url },
+      { new: true }
+    ).select("-__v");
+
+    res.json(user);
+  } catch (err) {
+    console.error("Profile pic update error:", err);
+    res.status(500).json({ message: "Failed to update profile picture" });
+  }
+});
+
 router.put("/update", protect, async (req, res) => {
   const { bio,name ,department,year} = req.body;
   const user = await User.findById(req.user._id);
