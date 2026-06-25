@@ -432,35 +432,72 @@ function ArticlesPage({ user }) {
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [caption, setCaption] = useState("");
   const [loading, setLoading] = useState(true);
-
+  
   useEffect(() => { injectStyles("mcoe-articles-styles", STYLES); }, []);
-
+  
   // ── Fetch articles ──
-  useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        const res = await api.get("/api/moments/article");
-        setArticles(res.data);
-      } catch (err) {
-        console.error("Failed to fetch articles:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchArticles();
-  }, []);
+useEffect(() => {
+  const cache = localStorage.getItem("articles");
 
-  // ── Moment new article ──
-  const postArticle = async () => {
-    if (!caption.trim()) return;
+  if (cache) {
+    const { data, timestamp } = JSON.parse(cache);
+
+    // Cache valid for 5 minutes
+    if (Date.now() - timestamp < 5 * 60 * 1000) {
+      setArticles(data);
+      setLoading(false);
+      return;
+    }
+  }
+
+  const fetchArticles = async () => {
     try {
-      const res = await api.post("/api/moments/article", { caption });
-      setArticles((prev) => [res.data, ...prev]);
-      setCaption("");
+      const res = await api.get("/api/moments/article");
+
+      setArticles(res.data);
+      
+      localStorage.setItem(
+        "articles",
+        JSON.stringify({
+          data: res.data,
+          timestamp: Date.now(),
+        })
+      );
     } catch (err) {
-      console.error("Failed to moment article:", err);
+      console.error("Failed to fetch articles:", err);
+    } finally {
+      setLoading(false);
     }
   };
+
+  fetchArticles();
+}, []);
+  // ── Moment new article ──
+const postArticle = async () => {
+  if (!caption.trim()) return;
+
+  try {
+    const res = await api.post("/api/moments/article", { caption });
+    
+    setArticles((prev) => {
+      const updated = [res.data, ...prev];
+
+      localStorage.setItem(
+        "articles",
+        JSON.stringify({
+          data: updated,
+          timestamp: Date.now(),
+        })
+      );
+
+      return updated;
+    });
+
+    setCaption("");
+  } catch (err) {
+    console.error("Failed to moment article:", err);
+  }
+};
 
   // ── Optimistic like toggle ──
   const toggleLike = async (articleId) => {
@@ -484,14 +521,30 @@ function ArticlesPage({ user }) {
   };
 
   // ── Delete article ──
-  const deleteArticle = async (articleId) => {
-    try {
-      await api.delete(`/api/moments/article/delete/${articleId}`);
-      setArticles((prev) => prev.filter((a) => a._id !== articleId));
-    } catch (err) {
-      console.error("Delete failed:", err);
-    }
-  };
+const deleteArticle = async (articleId) => {
+  try {
+    await api.delete(`/api/moments/article/delete/${articleId}`);
+
+    setArticles((prev) => {
+      const updated = prev.filter(
+        (article) => article._id !== articleId
+      );
+
+      localStorage.setItem(
+        "articles",
+        JSON.stringify({
+          data: updated,
+          timestamp: Date.now(),
+        })
+      );
+
+      return updated;
+    });
+
+  } catch (err) {
+    console.error("Delete failed:", err);
+  }
+};
 
   // ── Add comment ──
   const addComment = async (e, articleId) => {

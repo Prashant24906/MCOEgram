@@ -29,8 +29,9 @@ exports.getMoments = async (req, res) => {
   }
 };
 
-exports.getArticle = async (req, res) => {
-  try {
+  exports.getArticle = async (req, res) => {
+    try {
+    const start = Date.now();
     const articles = await Article.find()
       .populate("user", "name profilePic")
       .sort({ createdAt: -1 });
@@ -46,6 +47,7 @@ exports.getArticle = async (req, res) => {
         };
       }),
     );
+    console.log("Query took:", Date.now() - start, "ms");
     res.json(WithComments);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch moments" });
@@ -186,6 +188,7 @@ exports.createArticle = async (req, res) => {
       user: req.user._id,
       caption,
     });
+    await article.populate("user", "name profilePic");
     res.status(201).json(article);
   } catch (error) {
     console.log(error);
